@@ -1,12 +1,8 @@
-"""Production settings — Railway/Render style deploy. See PLAN.md open risk on hosting."""
-
 from .base import *  # noqa: F401,F403
 from .base import env
 
 DEBUG = False
 
-# SECRET_KEY / ALLOWED_HOSTS / DATABASE_URL are required env vars in prod — fail loudly
-# rather than silently falling back to insecure defaults.
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 
@@ -18,8 +14,6 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Media storage — Cloudflare R2 (S3-compatible) via django-storages. See PLAN.md
-# "Media storage" decision. Swaps in for the local-filesystem default from base.py.
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 AWS_ACCESS_KEY_ID = env("R2_ACCESS_KEY_ID", default=None)
 AWS_SECRET_ACCESS_KEY = env("R2_SECRET_ACCESS_KEY", default=None)
@@ -29,7 +23,6 @@ AWS_S3_CUSTOM_DOMAIN = env("R2_PUBLIC_DOMAIN", default=None)
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 
-# Error tracking (optional — see PLAN.md package list)
 SENTRY_DSN = env("SENTRY_DSN", default=None)
 if SENTRY_DSN:
     import sentry_sdk
