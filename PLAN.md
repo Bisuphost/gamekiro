@@ -1,4 +1,4 @@
-# eKuraa Community Platform — Build Plan
+# Gamekiro Community Platform — Build Plan
 
 Two devs (Sambhav, Prabesh), both full-stack. Every phase after Foundation splits into two
 independent vertical slices (models → views → templates) so both people always have something
