@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ thread.title }}{% endblock %}
+
+{% block content %}
+<div class="text-sm text-slate-500 mb-4">
+    <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a> /
+    <a href="{% url 'forum:category_detail' thread.category.slug %}" class="hover:underline">{{ thread.category.name }}</a> /
+    {{ thread.title }}
+</div>
+
+<h1 class="text-2xl font-bold mb-1">
+    {% if thread.is_pinned %}📌 {% endif %}{{ thread.title }}
+    {% if thread.is_locked %}🔒{% endif %}
+</h1>
+<p class="text-sm text-slate-500 mb-6">started by {{ thread.author.username }} &middot; {{ thread.created_at|date:"M j, Y" }}</p>
+
+<div class="space-y-6">
+    {% for post in posts %}
+    <div class="border-b border-slate-200 pb-4">
+        <p class="text-sm text-slate-500 mb-1">
+            {{ post.author.username }} &middot; {{ post.created_at|date:"M j, Y, g:i a" }}
+            {% if post.edited_at %}&middot; edited{% endif %}
+        </p>
+        <div class="text-slate-800">{{ post.body|linebreaks }}</div>
+    </div>
+    {% empty %}
+    <p class="text-slate-500">No posts yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

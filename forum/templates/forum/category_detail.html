@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block content %}
+<div class="text-sm text-slate-500 mb-4">
+    <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a> / {{ category.name }}
+</div>
+
+<h1 class="text-2xl font-bold mb-2">{{ category.name }}</h1>
+{% if category.description %}
+<p class="text-slate-600 mb-6">{{ category.description }}</p>
+{% endif %}
+
+<ul class="divide-y divide-slate-200 border-t border-b border-slate-200">
+    {% for thread in threads %}
+    <li class="py-4 flex items-baseline justify-between gap-4">
+        <div>
+            <a href="{% url 'forum:thread_detail' category.slug thread.slug %}" class="font-medium hover:underline">
+                {% if thread.is_pinned %}📌 {% endif %}{{ thread.title }}
+                {% if thread.is_locked %}🔒{% endif %}
+            </a>
+            <p class="text-sm text-slate-500 mt-1">by {{ thread.author.username }}</p>
+        </div>
+        <span class="text-sm text-slate-400 whitespace-nowrap">{{ thread.created_at|date:"M j, Y" }}</span>
+    </li>
+    {% empty %}
+    <li class="py-8 text-center text-slate-500">No threads yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
