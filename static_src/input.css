@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@source "../templates";
+@source "../core/templates";
+@source "../accounts/templates";
+@source "../forum/templates";
+@source "../reactions/templates";
+@source "../social/templates";
+@source "../messaging/templates";
+@source "../notifications/templates";
+@source "../reputation/templates";
+@source "../gamification/templates";
+@source "../games/templates";

@@ -1,4 +1,4 @@
-from .base import *  # noqa: F401,F403
+from .base import *
 from .base import env
 
 DEBUG = False
@@ -13,6 +13,8 @@ SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 AWS_ACCESS_KEY_ID = env("R2_ACCESS_KEY_ID", default=None)

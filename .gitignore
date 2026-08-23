@@ -15,6 +15,10 @@ db.sqlite3-journal
 /staticfiles/
 /media/
 
+# Tailwind
+/bin/tailwindcss
+/static/css/output.css
+
 # Env / secrets
 .env
 

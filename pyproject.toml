@@ -10,6 +10,11 @@ exclude = [".venv", "migrations"]
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 
+[tool.ruff.lint.per-file-ignores]
+"gamekiro/settings/dev.py" = ["F401", "F403", "F405"]
+"gamekiro/settings/prod.py" = ["F401", "F403", "F405"]
+"accounts/apps.py" = ["F401"]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "gamekiro.settings.dev"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]

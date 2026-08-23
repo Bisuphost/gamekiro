@@ -1,27 +1,29 @@
 # eKuraa Community Platform
 
-Django project scaffold. See [PLAN.md](PLAN.md) for the full build plan, architecture
-decisions, and phased roadmap.
+Django project. See [PLAN.md](PLAN.md) for the full build plan, architecture decisions, and
+phased roadmap.
 
 ## Project layout
 
 ```
-gamekiro/settings/    # base.py (shared) + dev.py + prod.py — see PLAN.md Phase 0
-core/                 # shared, no user-facing feature of its own
-accounts/             # Profile, ProfileGame
-forum/                # Category, Thread, Post
-reactions/             # generic Reaction (Post/Thread/Review)
-social/                # Follow
-messaging/             # 1:1 DMs
-notifications/          # Notification + notify() helper
-reputation/            # KarmaEvent, KarmaScore
-gamification/           # Badge, UserBadge
-games/                  # Platform, Game, Review
+gamekiro/settings/    base.py + dev.py + prod.py
+gamekiro/celery.py    Celery app instance
+core/                 TimestampedModel, base template, nav, footer, 404/500, home view
+accounts/             Profile, ProfileGame, signup, profile page, auto-create-Profile signal
+forum/                Category, Thread, Post
+reactions/            generic Reaction (Post/Thread/Review)
+social/               Follow
+messaging/            1:1 DMs
+notifications/        Notification + notify() helper
+reputation/           KarmaEvent, KarmaScore
+gamification/         Badge, UserBadge
+games/                Platform, Game, Review
+static_src/           Tailwind input.css
+static/css/           Tailwind build output (generated, not committed)
 ```
 
-Each app above is currently an empty `startapp` scaffold (models/views/admin are the
-Django defaults) — no models, views, or templates have been implemented yet. That's the
-next step per PLAN.md's phase breakdown.
+Every app past `core` and `accounts` is still an empty scaffold — no models/views/templates
+implemented yet beyond Phase 0. That's the next step per PLAN.md's phase breakdown.
 
 ## Local setup
 
@@ -30,19 +32,48 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env   # then fill in DATABASE_URL etc.
+brew install postgresql@16 redis
+brew services start postgresql@16
+brew services start redis
+createuser gamekiro --pwprompt
+createdb -O gamekiro gamekiro
+
+cp .env.example .env
+
+./scripts/install-tailwind.sh
+./scripts/build-css.sh
 
 python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-`manage.py` defaults to `gamekiro.settings.dev` (sqlite fallback if `DATABASE_URL` is
-unset). `wsgi.py`/`asgi.py` default to `gamekiro.settings.prod` for deployment.
+`manage.py` defaults to `gamekiro.settings.dev`; `wsgi.py`/`asgi.py` default to
+`gamekiro.settings.prod`. Local dev falls back to sqlite if `DATABASE_URL` is unset in `.env`.
 
-## Notes
+## Tailwind
 
-- Local dev falls back to sqlite if `DATABASE_URL` isn't set in `.env`; set it to a
-  Postgres URL to match production (see PLAN.md — Postgres is the target DB).
-- Celery/Redis config is wired in settings but no tasks exist yet (Phase 3+).
-- Tailwind (standalone CLI) and the deploy pipeline are not set up yet — see PLAN.md
-  Phase 0 checklist for what's still open.
+Standalone CLI binary, no Node toolchain. `./scripts/watch-css.sh` rebuilds
+`static/css/output.css` on change while developing; `./scripts/build-css.sh` does a one-off
+minified build.
+
+## Celery
+
+```bash
+celery -A gamekiro worker -l info
+celery -A gamekiro beat -l info
+```
+
+No real tasks exist yet — this is infra-only for now (Phase 3+ adds karma/badge tasks).
+
+## CI
+
+`.github/workflows/ci.yml` runs `ruff`, `black --check`, and `manage.py test` (against a
+Postgres service container) on every PR and push to `main`.
+
+## Still open
+
+- Deploy pipeline (hosting platform, GitHub Actions auto-deploy to staging) — deliberately not
+  set up yet; see PLAN.md's open risks on hosting.
+- Media storage (Cloudflare R2) — settings are wired in `prod.py` but untested against a real
+  bucket.
