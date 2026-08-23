@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Forum{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Forum</h1>
+
+<div class="space-y-3">
+    {% for category in categories %}
+    <a href="{% url 'forum:category_detail' category.slug %}"
+       class="block rounded-lg border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-sm transition">
+        <h2 class="text-lg font-semibold text-slate-900">{{ category.name }}</h2>
+        {% if category.description %}
+        <p class="text-sm text-slate-600 mt-1">{{ category.description }}</p>
+        {% endif %}
+    </a>
+    {% empty %}
+    <div class="rounded-lg border border-dashed border-slate-300 py-12 text-center text-slate-500">
+        No categories yet.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
