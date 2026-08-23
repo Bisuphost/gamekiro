@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
@@ -7,6 +8,8 @@ from django.views.decorators.http import require_POST
 
 from .forms import PostForm, ThreadForm
 from .models import Category, Post, Thread
+
+THREADS_PER_PAGE = 20
 
 
 def category_list(request):
@@ -16,7 +19,9 @@ def category_list(request):
 
 def category_detail(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
-    threads = category.threads.select_related("author")
+    thread_qs = category.threads.select_related("author")
+    paginator = Paginator(thread_qs, THREADS_PER_PAGE)
+    threads = paginator.get_page(request.GET.get("page"))
     return render(request, "forum/category_detail.html", {"category": category, "threads": threads})
 
 
