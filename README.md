@@ -1,4 +1,4 @@
-# eKuraa Community Platform
+# Gamekiro Community Platform
 
 Django project. See [PLAN.md](PLAN.md) for the full build plan, architecture decisions, and
 phased roadmap.
