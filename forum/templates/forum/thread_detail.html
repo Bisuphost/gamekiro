@@ -28,4 +28,25 @@
     <p class="text-slate-500">No posts yet.</p>
     {% endfor %}
 </div>
+
+<div class="mt-8 pt-6 border-t border-slate-200 max-w-2xl">
+    {% if thread.is_locked %}
+    <p class="text-sm text-slate-500">This thread is locked — no new replies.</p>
+    {% elif reply_form %}
+    <form method="post" action="{% url 'forum:post_create' thread.category.slug thread.slug %}" class="space-y-4">
+        {% csrf_token %}
+        {{ reply_form.non_field_errors }}
+        {% for field in reply_form %}
+        <div>
+            <label class="block text-sm font-medium mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <button type="submit" class="rounded bg-slate-900 text-white py-2 px-4 text-sm">Reply</button>
+    </form>
+    {% else %}
+    <a href="{% url 'login' %}?next={{ request.path }}" class="text-sm underline">Log in to reply</a>
+    {% endif %}
+</div>
 {% endblock %}

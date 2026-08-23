@@ -7,7 +7,14 @@
     <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a> / {{ category.name }}
 </div>
 
-<h1 class="text-2xl font-bold mb-2">{{ category.name }}</h1>
+<div class="flex items-start justify-between gap-4 mb-2">
+    <h1 class="text-2xl font-bold">{{ category.name }}</h1>
+    {% if user.is_authenticated %}
+    <a href="{% url 'forum:thread_create' category.slug %}" class="rounded bg-slate-900 text-white py-2 px-4 text-sm whitespace-nowrap">New thread</a>
+    {% else %}
+    <a href="{% url 'login' %}?next={% url 'forum:thread_create' category.slug %}" class="text-sm underline whitespace-nowrap">Log in to post</a>
+    {% endif %}
+</div>
 {% if category.description %}
 <p class="text-slate-600 mb-6">{{ category.description }}</p>
 {% endif %}
