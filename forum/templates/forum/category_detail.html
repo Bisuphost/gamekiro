@@ -29,6 +29,18 @@
 <div class="mb-6"></div>
 {% endif %}
 
+<form method="get" class="mb-4 flex flex-wrap items-center gap-3">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search threads…"
+           class="w-full sm:w-64 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900">
+    {% if status_filter %}<input type="hidden" name="filter" value="{{ status_filter }}">{% endif %}
+    <div class="flex items-center gap-1 text-sm">
+        <a href="?q={{ query|urlencode }}" class="rounded-full px-3 py-1 {% if not status_filter %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">All</a>
+        <a href="?q={{ query|urlencode }}&filter=pinned" class="rounded-full px-3 py-1 {% if status_filter == "pinned" %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">Pinned</a>
+        <a href="?q={{ query|urlencode }}&filter=locked" class="rounded-full px-3 py-1 {% if status_filter == "locked" %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">Locked</a>
+    </div>
+    <button type="submit" class="rounded-md bg-slate-900 text-white py-2 px-4 text-sm font-medium hover:bg-slate-700 transition">Search</button>
+</form>
+
 <div class="rounded-lg border border-slate-200 bg-white divide-y divide-slate-200 overflow-hidden">
     {% for thread in threads %}
     <a href="{% url 'forum:thread_detail' category.slug thread.slug %}"
@@ -48,14 +60,16 @@
         <span class="shrink-0 text-sm text-slate-400 whitespace-nowrap">{{ thread.created_at|date:"M j, Y" }}</span>
     </a>
     {% empty %}
-    <div class="py-12 text-center text-slate-500">No threads yet — be the first to post.</div>
+    <div class="py-12 text-center text-slate-500">
+        {% if query or status_filter %}No threads match your search.{% else %}No threads yet — be the first to post.{% endif %}
+    </div>
     {% endfor %}
 </div>
 
 {% if threads.paginator.num_pages > 1 %}
 <nav class="mt-6 flex items-center justify-between text-sm">
     {% if threads.has_previous %}
-    <a href="?page={{ threads.previous_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">&larr; Previous</a>
+    <a href="?page={{ threads.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if status_filter %}&filter={{ status_filter|urlencode }}{% endif %}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">&larr; Previous</a>
     {% else %}
     <span class="text-slate-300">&larr; Previous</span>
     {% endif %}
@@ -63,7 +77,7 @@
     <span class="text-slate-500">Page {{ threads.number }} of {{ threads.paginator.num_pages }}</span>
 
     {% if threads.has_next %}
-    <a href="?page={{ threads.next_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">Next &rarr;</a>
+    <a href="?page={{ threads.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if status_filter %}&filter={{ status_filter|urlencode }}{% endif %}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">Next &rarr;</a>
     {% else %}
     <span class="text-slate-300">Next &rarr;</span>
     {% endif %}
