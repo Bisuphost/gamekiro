@@ -6,13 +6,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
-from reactions.services import has_reacted, liked_pks_for, reaction_count, reaction_counts_for
-
 from .forms import PostForm, ThreadForm
 from .models import Category, Post, Thread
 
 THREADS_PER_PAGE = 20
-POSTS_PER_PAGE = 20
 
 
 def category_list(request):
@@ -23,31 +20,9 @@ def category_list(request):
 def category_detail(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
     thread_qs = category.threads.select_related("author")
-
-    query = request.GET.get("q", "").strip()
-    if query:
-        thread_qs = thread_qs.filter(title__icontains=query)
-
-    status_filter = request.GET.get("filter", "")
-    if status_filter not in ("pinned", "locked"):
-        status_filter = ""
-    if status_filter == "pinned":
-        thread_qs = thread_qs.filter(is_pinned=True)
-    elif status_filter == "locked":
-        thread_qs = thread_qs.filter(is_locked=True)
-
     paginator = Paginator(thread_qs, THREADS_PER_PAGE)
     threads = paginator.get_page(request.GET.get("page"))
-    return render(
-        request,
-        "forum/category_detail.html",
-        {
-            "category": category,
-            "threads": threads,
-            "query": query,
-            "status_filter": status_filter,
-        },
-    )
+    return render(request, "forum/category_detail.html", {"category": category, "threads": threads})
 
 
 def thread_detail(request, category_slug, thread_slug):
@@ -56,20 +31,7 @@ def thread_detail(request, category_slug, thread_slug):
         category__slug=category_slug,
         slug=thread_slug,
     )
-    post_qs = thread.posts.select_related("author")
-    paginator = Paginator(post_qs, POSTS_PER_PAGE)
-    posts = paginator.get_page(request.GET.get("page"))
-
-    post_list = list(posts.object_list)
-    counts = reaction_counts_for(post_list)
-    liked_pks = liked_pks_for(request.user, post_list)
-    for post in post_list:
-        post.like_count = counts.get(post.pk, 0)
-        post.user_has_liked = post.pk in liked_pks
-
-    thread.like_count = reaction_count(thread)
-    thread.user_has_liked = has_reacted(request.user, thread)
-
+    posts = thread.posts.select_related("author")
     reply_form = PostForm() if request.user.is_authenticated else None
     return render(
         request,
