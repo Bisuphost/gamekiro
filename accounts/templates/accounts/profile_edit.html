@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Edit profile | Gamekiro</title></head>
+<body>
+<main><h1>Edit profile</h1>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}{{ form.as_p }}<button type="submit">Save profile</button>
+</form>
+<a href="{% url 'accounts:profile-detail' request.user.username %}">Cancel</a>
+</main>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ list_type }} | Gamekiro</title></head>
+<body>
+<main><h1>{{ list_type }} for {{ profile_user.username }}</h1>
+<ul>{% for user in users %}<li><a href="{% url 'accounts:profile-detail' user.username %}">{{ user.username }}</a></li>{% empty %}<li>No users yet.</li>{% endfor %}</ul>
+<a href="{% url 'accounts:profile-detail' profile_user.username %}">Back to profile</a>
+</main>
+</body>
+</html>
