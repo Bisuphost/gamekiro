@@ -5,14 +5,13 @@ from django.contrib.auth.models import User
 from .models import Profile
 
 
-class SignupForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+from .models import Profile
 
-    class Meta(UserCreationForm.Meta):
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
         model = User
-        fields = ["username", "email"]
-
-
+        fields = ["username", "email", "password1", "password2"]
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
@@ -23,6 +22,7 @@ class ProfileForm(forms.ModelForm):
             "steam_id",
             "psn_id",
             "website",
+            "other_links",
         ]
         widgets = {
             "bio": forms.Textarea(attrs={"rows": 5}),
