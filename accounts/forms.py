@@ -5,13 +5,14 @@ from django.contrib.auth.models import User
 from .models import Profile
 
 
-from .models import Profile
+class SignupForm(UserCreationForm):
+    email = forms.EmailField(required=True)
 
-
-class ProfileForm(forms.ModelForm):
-    class Meta:
+    class Meta(UserCreationForm.Meta):
         model = User
-        fields = ["username", "email", "password1", "password2"]
+        fields = ["username", "email"]
+
+
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile

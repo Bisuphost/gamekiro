@@ -21,21 +21,21 @@ class ProfileTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.profile.bio, "Ready to play")
 
-	def test_public_profile_displays_follow_counts(self):
-		response = self.client.get(reverse("accounts:profile-detail", args=["rival"]))
-		self.assertContains(response, "0 followers")
-		self.assertContains(response, "0 following")
+    def test_public_profile_displays_follow_counts(self):
+        response = self.client.get(reverse("accounts:profile-detail", args=["rival"]))
+        self.assertContains(response, "0 followers")
+        self.assertContains(response, "0 following")
 
-	def test_signup_creates_a_profile_with_all_profile_columns_available(self):
-		response = self.client.post(
-			reverse("accounts:signup"),
-			{
-				"username": "new-player",
-				"email": "new-player@example.com",
-				"password1": "StrongPassword123!",
-				"password2": "StrongPassword123!",
-			},
-		)
+    def test_signup_creates_a_profile_with_all_profile_columns_available(self):
+        response = self.client.post(
+            reverse("accounts:signup"),
+            {
+                "username": "new-player",
+                "email": "new-player@example.com",
+                "password1": "StrongPassword123!",
+                "password2": "StrongPassword123!",
+            },
+        )
 
-		self.assertRedirects(response, reverse("core:home"))
-		self.assertTrue(Profile.objects.filter(user__username="new-player").exists())
+        self.assertRedirects(response, reverse("core:home"))
+        self.assertTrue(Profile.objects.filter(user__username="new-player").exists())
