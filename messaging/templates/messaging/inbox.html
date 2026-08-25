@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Messages — eKuraa{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl">
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Messages</h1>
+        <a href="{% url 'messaging:user-list' %}" class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">New message</a>
+    </div>
+    {% if conversations %}
+        <div class="divide-y divide-slate-200 rounded border border-slate-200 bg-white">
+            {% for conversation in conversations %}
+                <a href="{% url 'messaging:conversation' conversation.partner.username %}" class="block px-4 py-4 hover:bg-slate-50">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h2 class="font-semibold">{{ conversation.partner.username }}</h2>
+                            <p class="truncate text-sm text-slate-600">{{ conversation.latest.body }}</p>
+                        </div>
+                        <div class="shrink-0 text-right text-xs text-slate-500">
+                            <time datetime="{{ conversation.latest.created_at|date:'c' }}">{{ conversation.latest.created_at|date:'M j, Y g:i A' }}</time>
+                            {% if conversation.unread_count %}<p class="mt-1 font-semibold text-red-600">{{ conversation.unread_count }} unread</p>{% endif %}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="rounded border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-slate-600">No messages yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
