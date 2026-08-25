@@ -27,6 +27,7 @@ class Profile(TimestampedModel):
     steam_id = models.CharField(max_length=64, blank=True)
     psn_id = models.CharField(max_length=64, blank=True)
     website = models.URLField(blank=True)
+    other_links = models.URLField(blank=True)
 
     def __str__(self):
         return self.user.username
