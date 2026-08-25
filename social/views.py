@@ -24,3 +24,5 @@ def toggle_follow(request, username):
     if request.headers.get("HX-Request"):
         return HttpResponse(f"<span>{target.followers.count()} followers</span>")
     return redirect("accounts:profile-detail", username=username)
+
+# Create your views here.
