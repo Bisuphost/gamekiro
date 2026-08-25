@@ -1,0 +1,103 @@
+from collections import OrderedDict
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import MessageForm
+from .models import Message
+
+
+@login_required
+def inbox(request):
+	messages = (
+		Message.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
+		.select_related("sender", "recipient")
+	)
+	conversations = OrderedDict()
+	for message in messages.order_by("-created_at"):
+		partner = message.recipient if message.sender_id == request.user.id else message.sender
+		if partner.id not in conversations:
+			conversations[partner.id] = {
+				"partner": partner,
+				"latest": message,
+				"unread_count": 0,
+			}
+		if message.recipient_id == request.user.id and not message.is_read:
+			conversations[partner.id]["unread_count"] += 1
+
+	return render(request, "messaging/inbox.html", {"conversations": conversations.values()})
+
+
+@login_required
+def user_list(request):
+	query = request.GET.get("q", "").strip()
+	users = User.objects.exclude(pk=request.user.pk)
+	if query:
+		users = users.filter(
+			Q(username__icontains=query)
+			| Q(first_name__icontains=query)
+			| Q(last_name__icontains=query)
+		)
+
+	return render(
+		request,
+		"messaging/user_list.html",
+		{"users": users.order_by("username"), "query": query},
+	)
+
+
+@login_required
+def conversation(request, username):
+	partner = get_object_or_404(User, username=username)
+	if partner == request.user:
+		raise Http404
+
+	Message.objects.filter(
+		sender=partner,
+		recipient=request.user,
+		is_read=False,
+	).update(is_read=True)
+	messages = Message.objects.filter(
+		Q(sender=request.user, recipient=partner) | Q(sender=partner, recipient=request.user)
+	).select_related("sender", "recipient")
+	return render(
+		request,
+		"messaging/conversation.html",
+		{"partner": partner, "messages": messages, "form": MessageForm()},
+	)
+
+
+@login_required
+def send_message(request, username):
+	recipient = get_object_or_404(User, username=username)
+	if recipient == request.user:
+		raise Http404
+	if request.method != "POST":
+		return redirect("messaging:conversation", username=recipient.username)
+
+	form = MessageForm(request.POST)
+	if form.is_valid():
+		message = form.save(commit=False)
+		message.sender = request.user
+		message.recipient = recipient
+		message.save()
+		return redirect("messaging:conversation", username=recipient.username)
+
+	messages = Message.objects.filter(
+		Q(sender=request.user, recipient=recipient) | Q(sender=recipient, recipient=request.user)
+	).select_related("sender", "recipient")
+	return render(
+		request,
+		"messaging/conversation.html",
+		{"partner": recipient, "messages": messages, "form": form},
+		status=400,
+	)
+
+
+@login_required
+def unread_count(request):
+	count = Message.objects.filter(recipient=request.user, is_read=False).count()
+	return render(request, "messaging/_unread_count.html", {"unread_count": count})
