@@ -1,12 +1,10 @@
 {% extends "base.html" %}
-{% load reputation_tags %}
 
 {% block title %}{{ profile_user.username }}{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <h1 class="text-2xl font-bold mb-2">{{ profile_user.username }}</h1>
-    <div class="mb-4">{% karma_badge profile_user %}</div>
     {% if profile_user.profile.bio %}
     <p class="text-slate-600 mb-6">{{ profile_user.profile.bio }}</p>
     {% endif %}
