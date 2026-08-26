@@ -1,0 +1,13 @@
+{% if user_badges %}
+<div class="flex flex-wrap gap-2">
+    {% for user_badge in user_badges %}
+    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-1"
+          title="{{ user_badge.badge.description }}">
+        {% if user_badge.badge.icon %}<span>{{ user_badge.badge.icon }}</span>{% endif %}
+        <span>{{ user_badge.badge.name }}</span>
+    </span>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-sm text-slate-500">No achievements yet.</p>
+{% endif %}

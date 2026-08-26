@@ -6,10 +6,12 @@ from django.template import Context, Template
 from django.test import TestCase
 
 from forum.models import Category, Post, Thread
+from gamification.models import Badge, UserBadge
 from reactions.models import Reaction
 
 from .models import KarmaEvent, KarmaScore
 from .services import recalculate_karma
+from .tasks import recalculate_karma_task
 
 
 class RecalculateKarmaTests(TestCase):
@@ -95,6 +97,34 @@ class ReactionSignalTests(TestCase):
     def test_self_like_still_records_event(self, mock_delay):
         Reaction.objects.create(user=self.author, content_type=self.post_ct, object_id=self.post.pk)
         self.assertEqual(KarmaEvent.objects.count(), 1)
+
+
+class RecalculateKarmaTaskBadgeIntegrationTests(TestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(username="author", password="password123")
+        self.karma_badge = Badge.objects.get(criteria_key=Badge.CriteriaKey.KARMA_50)
+
+    def test_recalculate_karma_task_awards_badge_after_recalculating_score(self):
+        category = Category.objects.create(name="General", slug="general")
+        for i in range(50):
+            Thread.objects.create(
+                category=category, author=self.author, title=f"T{i}", slug=f"t{i}"
+            )
+        recalculate_karma_task(self.author.pk)
+        self.assertEqual(KarmaScore.objects.get(user=self.author).score, 50)
+        self.assertTrue(UserBadge.objects.filter(user=self.author, badge=self.karma_badge).exists())
+
+    def test_recalculate_karma_task_is_idempotent_across_repeated_calls(self):
+        category = Category.objects.create(name="General", slug="general")
+        for i in range(50):
+            Thread.objects.create(
+                category=category, author=self.author, title=f"T{i}", slug=f"t{i}"
+            )
+        recalculate_karma_task(self.author.pk)
+        recalculate_karma_task(self.author.pk)
+        self.assertEqual(
+            UserBadge.objects.filter(user=self.author, badge=self.karma_badge).count(), 1
+        )
 
 
 class KarmaBadgeTemplateTagTests(TestCase):
