@@ -1,5 +1,8 @@
 from kombu.exceptions import OperationalError
 
+from notifications.models import Notification
+from notifications.services import notify
+
 from .models import KarmaEvent
 from .tasks import recalculate_karma_task
 
@@ -31,6 +34,14 @@ def _record_and_dispatch(reaction, sign, reason):
         content_type=reaction.content_type,
         object_id=reaction.object_id,
     )
+
+    if sign == 1:
+        notify(
+            recipient=target.author,
+            actor=reaction.user,
+            verb=Notification.Verb.REACTION_RECEIVED,
+            target=target,
+        )
 
     try:
         recalculate_karma_task.delay(target.author_id)

@@ -21,6 +21,9 @@
                     <a href="{% url 'messaging:inbox' %}" class="hover:underline" hx-get="{% url 'messaging:unread-count' %}" hx-trigger="load, every 30s" hx-target="#message-unread-count" hx-swap="innerHTML">
                         Messages <span id="message-unread-count">{% include "messaging/_unread_count.html" %}</span>
                     </a>
+                    <a href="{% url 'notifications:list' %}" class="hover:underline" hx-get="{% url 'notifications:unread-count' %}" hx-trigger="load, every 30s" hx-target="#notification-unread-count" hx-swap="innerHTML">
+                        Notifications <span id="notification-unread-count">{% include "notifications/_unread_count.html" %}</span>
+                    </a>
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
                         <button type="submit" class="hover:underline">Log out</button>
@@ -43,8 +46,6 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
-
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
     <footer class="border-t border-slate-200 bg-white">
         <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-slate-500">

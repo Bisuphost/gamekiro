@@ -6,6 +6,9 @@ from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
+from notifications.models import Notification
+from notifications.services import notify
+
 from .forms import MessageForm
 from .models import Message
 
@@ -84,6 +87,12 @@ def send_message(request, username):
 		message.sender = request.user
 		message.recipient = recipient
 		message.save()
+		notify(
+			recipient=recipient,
+			actor=request.user,
+			verb=Notification.Verb.DM_RECEIVED,
+			target=message,
+		)
 		return redirect("messaging:conversation", username=recipient.username)
 
 	messages = Message.objects.filter(

@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("messaging.urls")),
     path("", include("forum.urls")),
     path("", include("reactions.urls")),
+    path("", include("notifications.urls")),
     path("", include("accounts.urls")),
     path("", include("core.urls")),
 ]

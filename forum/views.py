@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
+from notifications.models import Notification
+from notifications.services import notify
 from reactions.services import has_reacted, liked_pks_for, reaction_count, reaction_counts_for
 
 from .forms import PostForm, ThreadForm
@@ -116,14 +118,25 @@ def thread_create(request, category_slug):
 @login_required
 @require_POST
 def post_create(request, category_slug, thread_slug):
-    thread = get_object_or_404(Thread, category__slug=category_slug, slug=thread_slug)
+    thread = get_object_or_404(
+        Thread.objects.select_related("author"), category__slug=category_slug, slug=thread_slug
+    )
     if thread.is_locked:
         messages.error(request, "This thread is locked.")
         return redirect("forum:thread_detail", category_slug=category_slug, thread_slug=thread_slug)
 
     form = PostForm(request.POST)
     if form.is_valid():
-        Post.objects.create(thread=thread, author=request.user, body=form.cleaned_data["body"])
+        post = Post.objects.create(
+            thread=thread, author=request.user, body=form.cleaned_data["body"]
+        )
+        if thread.author_id != request.user.id:
+            notify(
+                recipient=thread.author,
+                actor=request.user,
+                verb=Notification.Verb.THREAD_REPLY,
+                target=post,
+            )
     else:
         messages.error(request, "Couldn't post your reply — please check the form.")
     return redirect("forum:thread_detail", category_slug=category_slug, thread_slug=thread_slug)

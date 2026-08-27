@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Notifications</h1>
+
+<div class="rounded-lg border border-slate-200 bg-white divide-y divide-slate-200 overflow-hidden">
+    {% for notification in notifications %}
+    <div class="flex items-start gap-3 p-4 {% if not notification.is_read %}bg-slate-50{% endif %}">
+        {% if not notification.is_read %}
+        <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-slate-900"></span>
+        {% else %}
+        <span class="mt-1.5 h-2 w-2 shrink-0"></span>
+        {% endif %}
+        <div class="min-w-0 flex-1">
+            {% if notification.verb == "new_follower" %}
+            <a href="{% url 'accounts:profile-detail' notification.actor.username %}" class="text-slate-900 hover:underline">
+                {{ notification.actor.username }} started following you
+            </a>
+            {% elif notification.verb == "thread_reply" %}
+            <a href="{% url 'forum:thread_detail' notification.target.thread.category.slug notification.target.thread.slug %}" class="text-slate-900 hover:underline">
+                {{ notification.actor.username }} replied to "{{ notification.target.thread.title }}"
+            </a>
+            {% elif notification.verb == "dm_received" %}
+            <a href="{% url 'messaging:conversation' notification.actor.username %}" class="text-slate-900 hover:underline">
+                {{ notification.actor.username }} sent you a message
+            </a>
+            {% elif notification.verb == "reaction_received" and notification.content_type.model == "thread" %}
+            <a href="{% url 'forum:thread_detail' notification.target.category.slug notification.target.slug %}" class="text-slate-900 hover:underline">
+                {{ notification.actor.username }} liked your thread "{{ notification.target.title }}"
+            </a>
+            {% elif notification.verb == "reaction_received" %}
+            <a href="{% url 'forum:thread_detail' notification.target.thread.category.slug notification.target.thread.slug %}" class="text-slate-900 hover:underline">
+                {{ notification.actor.username }} liked your reply
+            </a>
+            {% elif notification.verb == "badge_earned" %}
+            <span class="text-slate-900">You earned the "{{ notification.target.name }}" badge</span>
+            {% endif %}
+            <p class="text-sm text-slate-400 mt-1">{{ notification.created_at|date:"M j, Y, g:i a" }}</p>
+        </div>
+        {% if not notification.is_read %}
+        <form method="post" action="{% url 'notifications:mark-read' notification.pk %}" class="shrink-0">
+            {% csrf_token %}
+            <input type="hidden" name="page" value="{{ notifications.number }}">
+            <button type="submit" class="text-sm text-slate-600 underline underline-offset-2 hover:text-slate-900">Mark read</button>
+        </form>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="py-12 text-center text-slate-500">No notifications yet.</div>
+    {% endfor %}
+</div>
+
+{% if notifications.paginator.num_pages > 1 %}
+<nav class="mt-6 flex items-center justify-between text-sm">
+    {% if notifications.has_previous %}
+    <a href="?page={{ notifications.previous_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">&larr; Previous</a>
+    {% else %}
+    <span class="text-slate-300">&larr; Previous</span>
+    {% endif %}
+
+    <span class="text-slate-500">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
+
+    {% if notifications.has_next %}
+    <a href="?page={{ notifications.next_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">Next &rarr;</a>
+    {% else %}
+    <span class="text-slate-300">Next &rarr;</span>
+    {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

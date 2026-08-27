@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 
+from notifications.models import Notification
+from notifications.services import notify
+
 from .models import Follow
 
 
@@ -20,9 +23,11 @@ def toggle_follow(request, username):
         follow.delete()
     else:
         Follow.objects.create(follower=request.user, following=target)
+        notify(recipient=target, actor=request.user, verb=Notification.Verb.NEW_FOLLOWER)
 
     if request.headers.get("HX-Request"):
         return HttpResponse(f"<span>{target.followers.count()} followers</span>")
     return redirect("accounts:profile-detail", username=username)
+
 
 # Create your views here.
