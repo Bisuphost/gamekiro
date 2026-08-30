@@ -6,7 +6,7 @@
   <h1>{{ profile_user.username }}</h1>
   {% if profile_user.profile.avatar %}<img src="{{ profile_user.profile.avatar.url }}" alt="{{ profile_user.username }} avatar" width="120">{% endif %}
   <p>{{ profile_user.profile.bio|default:"No bio yet." }}</p>
-  <p><a href="{% url 'accounts:followers' profile_user.username %}">{{ profile_user.followers.count }} followers</a> · <a href="{% url 'accounts:following' profile_user.username %}">{{ profile_user.following.count }} following</a></p>
+  {% include "accounts/profile_stats.html" %}
   {% if profile_user.profile.discord_username %}<p>Discord: {{ profile_user.profile.discord_username }}</p>{% endif %}
   {% if profile_user.profile.steam_id %}<p>Steam: {{ profile_user.profile.steam_id }}</p>{% endif %}
   {% if profile_user.profile.psn_id %}<p>PSN: {{ profile_user.profile.psn_id }}</p>{% endif %}

@@ -16,6 +16,7 @@
             <a href="{% url 'core:home' %}" class="text-lg font-semibold">eKuraa</a>
             <div class="flex items-center gap-4 text-sm">
                 <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a>
+                <a href="{% url 'games:list' %}" class="hover:underline">Games</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'accounts:profile' user.username %}" class="hover:underline">{{ user.username }}</a>
                     <a href="{% url 'messaging:inbox' %}" class="hover:underline" hx-get="{% url 'messaging:unread-count' %}" hx-trigger="load, every 30s" hx-target="#message-unread-count" hx-swap="innerHTML">
