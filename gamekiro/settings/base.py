@@ -24,6 +24,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "django.contrib.postgres",
     "django_htmx",
     "taggit",
     "widget_tweaks",
@@ -36,6 +37,7 @@ LOCAL_APPS = [
     "accounts",
     "forum",
     "reactions",
+    "moderation",
     "social",
     "messaging",
     "notifications",

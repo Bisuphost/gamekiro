@@ -1,17 +1,22 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.search import SearchQuery, SearchRank
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 
+from moderation.models import Report
+from moderation.services import hidden_object_ids
 from notifications.models import Notification
 from notifications.services import notify
 from reactions.services import has_reacted, liked_pks_for, reaction_count, reaction_counts_for
 
 from .forms import PostForm, ThreadForm
 from .models import Category, Post, Thread
+from .services import is_rate_limited
 
 THREADS_PER_PAGE = 20
 POSTS_PER_PAGE = 20
@@ -24,11 +29,16 @@ def category_list(request):
 
 def category_detail(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
-    thread_qs = category.threads.select_related("author")
+    thread_qs = category.threads.select_related("author").exclude(pk__in=hidden_object_ids(Thread))
 
     query = request.GET.get("q", "").strip()
     if query:
-        thread_qs = thread_qs.filter(title__icontains=query)
+        search_query = SearchQuery(query, config="english")
+        thread_qs = (
+            thread_qs.filter(title_search_vector=search_query)
+            .annotate(rank=SearchRank(F("title_search_vector"), search_query))
+            .order_by("-rank")
+        )
 
     status_filter = request.GET.get("filter", "")
     if status_filter not in ("pinned", "locked"):
@@ -58,7 +68,7 @@ def thread_detail(request, category_slug, thread_slug):
         category__slug=category_slug,
         slug=thread_slug,
     )
-    post_qs = thread.posts.select_related("author")
+    post_qs = thread.posts.select_related("author").exclude(pk__in=hidden_object_ids(Post))
     paginator = Paginator(post_qs, POSTS_PER_PAGE)
     posts = paginator.get_page(request.GET.get("page"))
 
@@ -76,7 +86,12 @@ def thread_detail(request, category_slug, thread_slug):
     return render(
         request,
         "forum/thread_detail.html",
-        {"thread": thread, "posts": posts, "reply_form": reply_form},
+        {
+            "thread": thread,
+            "posts": posts,
+            "reply_form": reply_form,
+            "report_reasons": Report.Reason.choices,
+        },
     )
 
 
@@ -95,6 +110,12 @@ def _unique_thread_slug(category, title):
 def thread_create(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
     if request.method == "POST":
+        if is_rate_limited(request.user, Thread):
+            messages.error(
+                request,
+                "You're posting too fast — please wait a moment before creating another thread.",
+            )
+            return redirect("forum:category_detail", category_slug=category_slug)
         form = ThreadForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
@@ -123,6 +144,12 @@ def post_create(request, category_slug, thread_slug):
     )
     if thread.is_locked:
         messages.error(request, "This thread is locked.")
+        return redirect("forum:thread_detail", category_slug=category_slug, thread_slug=thread_slug)
+
+    if is_rate_limited(request.user, Post):
+        messages.error(
+            request, "You're posting too fast — please wait a moment before replying again."
+        )
         return redirect("forum:thread_detail", category_slug=category_slug, thread_slug=thread_slug)
 
     form = PostForm(request.POST)

@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .models import Category, Post, Thread
+from .services import RATE_LIMIT_MAX
 from .views import POSTS_PER_PAGE, THREADS_PER_PAGE
 
 
@@ -17,14 +18,14 @@ class CategoryDetailSearchFilterTests(TestCase):
             url += "?" + "&".join(f"{k}={v}" for k, v in params.items())
         return url
 
-    def test_search_matches_title_icontains(self):
+    def test_search_matches_whole_word_in_title(self):
         Thread.objects.create(
             category=self.category, author=self.user, title="Best RPGs 2026", slug="rpgs"
         )
         Thread.objects.create(
             category=self.category, author=self.user, title="Platformer tier list", slug="plat"
         )
-        response = self.client.get(self._detail_url(q="rpg"))
+        response = self.client.get(self._detail_url(q="rpgs"))
         self.assertContains(response, "Best RPGs 2026")
         self.assertNotContains(response, "Platformer tier list")
 
@@ -92,6 +93,13 @@ class CategoryDetailSearchFilterTests(TestCase):
         self.assertNotContains(response, "Mario thread")
         self.assertNotContains(response, "Zelda info")
 
+    def test_search_uses_word_matching_not_substring(self):
+        Thread.objects.create(
+            category=self.category, author=self.user, title="Best RPGs 2026", slug="rpgs"
+        )
+        response = self.client.get(self._detail_url(q="pg"))
+        self.assertNotContains(response, "Best RPGs 2026")
+
     def test_category_pagination_preserves_query_params(self):
         for i in range(THREADS_PER_PAGE + 5):
             Thread.objects.create(
@@ -133,3 +141,34 @@ class ThreadDetailPaginationTests(TestCase):
         response = self.client.get(self._thread_url(page="2"))
         self.assertIsNotNone(response.context["reply_form"])
         self.assertContains(response, "Reply")
+
+
+class RateLimitTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="player", password="password123")
+        self.other_user = User.objects.create_user(username="rival", password="password123")
+        self.category = Category.objects.create(name="General", slug="general")
+        self.thread = Thread.objects.create(
+            category=self.category, author=self.other_user, title="Hello", slug="hello"
+        )
+        self.client.login(username="player", password="password123")
+
+    def test_thread_creation_rate_limited(self):
+        url = reverse("forum:thread_create", args=[self.category.slug])
+        for i in range(RATE_LIMIT_MAX["thread"]):
+            self.client.post(url, {"title": f"Thread {i}", "body": "body"})
+        self.assertEqual(Thread.objects.filter(author=self.user).count(), RATE_LIMIT_MAX["thread"])
+
+        response = self.client.post(url, {"title": "One too many", "body": "body"}, follow=True)
+        self.assertEqual(Thread.objects.filter(author=self.user).count(), RATE_LIMIT_MAX["thread"])
+        self.assertContains(response, "posting too fast")
+
+    def test_post_creation_rate_limited(self):
+        url = reverse("forum:post_create", args=[self.category.slug, self.thread.slug])
+        for i in range(RATE_LIMIT_MAX["post"]):
+            self.client.post(url, {"body": f"Reply {i}"})
+        self.assertEqual(Post.objects.count(), RATE_LIMIT_MAX["post"])
+
+        response = self.client.post(url, {"body": "One too many"}, follow=True)
+        self.assertEqual(Post.objects.count(), RATE_LIMIT_MAX["post"])
+        self.assertContains(response, "posting too fast")

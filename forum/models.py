@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models
 
 
@@ -26,6 +28,11 @@ class Thread(models.Model):
     is_pinned = models.BooleanField(default=False)
     is_locked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    title_search_vector = models.GeneratedField(
+        expression=SearchVector("title", config="english"),
+        output_field=SearchVectorField(),
+        db_persist=True,
+    )
 
     class Meta:
         ordering = ["-is_pinned", "-created_at"]
@@ -33,6 +40,9 @@ class Thread(models.Model):
             models.UniqueConstraint(
                 fields=["category", "slug"], name="unique_thread_slug_per_category"
             )
+        ]
+        indexes = [
+            GinIndex(fields=["title_search_vector"], name="thread_title_search_idx"),
         ]
 
     def __str__(self):
