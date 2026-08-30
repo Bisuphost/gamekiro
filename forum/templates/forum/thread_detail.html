@@ -21,7 +21,11 @@
     {% endif %}
     <h1 class="text-2xl font-bold text-slate-900">{{ thread.title }}</h1>
 </div>
-<p class="text-sm text-slate-500 mb-6">started by {{ thread.author.username }} &middot; {{ thread.created_at|date:"M j, Y" }}</p>
+<p class="text-sm text-slate-500 mb-3">started by {{ thread.author.username }} &middot; {{ thread.created_at|date:"M j, Y" }}</p>
+
+<div class="mb-6">
+    {% include "reactions/_like_button.html" with target_app="forum" target_model="thread" target_pk=thread.pk liked=thread.user_has_liked count=thread.like_count %}
+</div>
 
 <div class="space-y-4">
     {% for post in posts %}
@@ -31,12 +35,31 @@
             <span class="mx-1">&middot;</span>{{ post.created_at|date:"M j, Y, g:i a" }}
             {% if post.edited_at %}<span class="mx-1">&middot;</span>edited{% endif %}
         </p>
-        <div class="text-slate-800 leading-relaxed">{{ post.body|linebreaks }}</div>
+        <div class="text-slate-800 leading-relaxed mb-3">{{ post.body|linebreaks }}</div>
+        {% include "reactions/_like_button.html" with target_app="forum" target_model="post" target_pk=post.pk liked=post.user_has_liked count=post.like_count %}
     </div>
     {% empty %}
     <div class="rounded-lg border border-dashed border-slate-300 py-12 text-center text-slate-500">No posts yet.</div>
     {% endfor %}
 </div>
+
+{% if posts.paginator.num_pages > 1 %}
+<nav class="mt-6 flex items-center justify-between text-sm">
+    {% if posts.has_previous %}
+    <a href="?page={{ posts.previous_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">&larr; Previous</a>
+    {% else %}
+    <span class="text-slate-300">&larr; Previous</span>
+    {% endif %}
+
+    <span class="text-slate-500">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+
+    {% if posts.has_next %}
+    <a href="?page={{ posts.next_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">Next &rarr;</a>
+    {% else %}
+    <span class="text-slate-300">Next &rarr;</span>
+    {% endif %}
+</nav>
+{% endif %}
 
 <div class="mt-8 pt-6 border-t border-slate-200 max-w-2xl">
     {% if thread.is_locked %}
