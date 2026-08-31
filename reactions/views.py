@@ -9,6 +9,7 @@ from .services import has_reacted, reaction_count, toggle_reaction
 
 REACTABLE_MODELS = {
     "forum": {"post", "thread"},
+    "games": {"review"},
 }
 
 

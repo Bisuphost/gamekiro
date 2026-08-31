@@ -1,5 +1,5 @@
 <dl class="grid grid-cols-3 gap-4 text-center text-sm">
-    <div><dt class="text-slate-500">Followers</dt><dd class="font-semibold"><a href="{% url 'accounts:followers' profile_user.username %}" class="hover:underline">{{ profile_user.followers.count }}</a></dd></div>
-    <div><dt class="text-slate-500">Following</dt><dd class="font-semibold"><a href="{% url 'accounts:following' profile_user.username %}" class="hover:underline">{{ profile_user.following.count }}</a></dd></div>
+    <div><dt class="text-slate-500">Followers</dt><dd class="font-semibold"><a href="{% url 'accounts:followers' profile_user.username %}" class="hover:underline">{{ profile_user.followers.count }} followers</a></dd></div>
+    <div><dt class="text-slate-500">Following</dt><dd class="font-semibold"><a href="{% url 'accounts:following' profile_user.username %}" class="hover:underline">{{ profile_user.following.count }} following</a></dd></div>
     <div><dt class="text-slate-500">Karma</dt><dd class="font-semibold">{{ karma_score|default:"0" }}</dd></div>
 </dl>
