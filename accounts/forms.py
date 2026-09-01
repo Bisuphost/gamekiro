@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Profile
+from .models import Profile, ProfileGame
 
 
 class SignupForm(UserCreationForm):
@@ -30,4 +30,13 @@ class ProfileForm(forms.ModelForm):
         ]
         widgets = {
             "bio": forms.Textarea(attrs={"rows": 5}),
+        }
+
+
+class ProfileGameForm(forms.ModelForm):
+    class Meta:
+        model = ProfileGame
+        fields = ["game", "status"]
+        widgets = {
+            "status": forms.Select(attrs={"class": "rounded border border-slate-300 px-3 py-2"}),
         }

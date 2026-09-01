@@ -17,6 +17,7 @@
     </form>
   {% endif %}
   {% if request.user == profile_user %}<a href="{% url 'accounts:profile-edit' %}">Edit profile</a>{% endif %}
+  {% with profile_games=profile_user.profile.profile_games.all %}{% include "accounts/profile_games.html" %}{% endwith %}
 </main>
 </body>
 </html>
