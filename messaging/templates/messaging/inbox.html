@@ -20,6 +20,10 @@
                         <div class="shrink-0 text-right text-xs text-slate-500">
                             <time datetime="{{ conversation.latest.created_at|date:'c' }}">{{ conversation.latest.created_at|date:'M j, Y g:i A' }}</time>
                             {% if conversation.unread_count %}<p class="mt-1 font-semibold text-red-600">{{ conversation.unread_count }} unread</p>{% endif %}
+                            <form method="post" action="{% url 'messaging:archive' conversation.partner.username %}" class="mt-2" onclick="event.stopPropagation();" onsubmit="return confirm('Archive this conversation?');">
+                                {% csrf_token %}
+                                <button type="submit" class="hover:underline">Archive</button>
+                            </form>
                         </div>
                     </div>
                 </a>

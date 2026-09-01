@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Message
+from .models import ConversationArchive, Message
 
 
 class MessagingTests(TestCase):
@@ -100,3 +100,34 @@ class MessagingTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertFalse(Message.objects.exists())
+
+    def test_user_can_archive_only_their_own_conversation(self):
+        Message.objects.create(sender=self.sender, recipient=self.recipient, body="Keep this")
+        self.client.login(username="recipient", password="password123")
+
+        response = self.client.post(reverse("messaging:archive", args=["sender"]))
+
+        self.assertRedirects(response, reverse("messaging:inbox"))
+        self.assertTrue(
+            ConversationArchive.objects.filter(user=self.recipient, partner=self.sender).exists()
+        )
+        self.assertNotContains(self.client.get(reverse("messaging:inbox")), "Keep this")
+
+        self.client.login(username="sender", password="password123")
+        self.client.post(reverse("messaging:archive", args=["recipient"]))
+        self.assertTrue(
+            ConversationArchive.objects.filter(user=self.sender, partner=self.recipient).exists()
+        )
+
+    def test_new_message_after_archive_is_visible_and_unread(self):
+        Message.objects.create(sender=self.sender, recipient=self.recipient, body="Old")
+        self.client.login(username="recipient", password="password123")
+        self.client.post(reverse("messaging:archive", args=["sender"]))
+
+        self.client.login(username="sender", password="password123")
+        self.client.post(reverse("messaging:send", args=["recipient"]), {"body": "New"})
+        self.client.login(username="recipient", password="password123")
+        response = self.client.get(reverse("messaging:inbox"))
+
+        self.assertContains(response, "New")
+        self.assertContains(response, "1 unread")
