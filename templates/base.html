@@ -12,9 +12,9 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
     <header class="border-b border-slate-200 bg-white">
-        <nav class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
+        <nav class="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <a href="{% url 'core:home' %}" class="text-lg font-semibold">eKuraa</a>
-            <div class="flex items-center gap-4 text-sm">
+            <div class="flex flex-wrap items-center gap-3 text-sm sm:gap-4">
                 <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a>
                 <a href="{% url 'games:list' %}" class="hover:underline">Games</a>
                 {% if user.is_authenticated %}
@@ -24,7 +24,7 @@
                     </a>
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button type="submit" class="hover:underline">Log out</button>
+                        <button type="submit" class="rounded px-2 py-1 text-left hover:underline">Log out</button>
                     </form>
                 {% else %}
                     <a href="{% url 'login' %}" class="hover:underline">Log in</a>
@@ -34,7 +34,7 @@
         </nav>
     </header>
 
-    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+    <main class="mx-auto flex w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
         {% if messages %}
             <ul class="mb-6 space-y-2">
                 {% for message in messages %}
@@ -46,6 +46,17 @@
     </main>
 
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cookie = document.cookie.split('; ').find((row) => row.startsWith('csrftoken='));
+            if (!cookie) return;
+            const token = decodeURIComponent(cookie.split('=')[1]);
+
+            document.body.addEventListener('htmx:configRequest', function (event) {
+                event.detail.headers['X-CSRFToken'] = token;
+            });
+        });
+    </script>
 
     <footer class="border-t border-slate-200 bg-white">
         <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-slate-500">

@@ -6,6 +6,7 @@ app_name = "accounts"
 
 urlpatterns = [
     path("edit/", views.profile_edit, name="profile-edit"),
+    path("setup/", views.profile_setup, name="profile-setup"),
     path("u/games/add/", views.profile_game_add, name="profile-game-add"),
     path("u/games/<int:pk>/update/", views.profile_game_update, name="profile-game-update"),
     path("u/games/<int:pk>/remove/", views.profile_game_remove, name="profile-game-remove"),

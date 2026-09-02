@@ -30,7 +30,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <p class="rounded border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-slate-600">No messages yet.</p>
+        {% include "components/empty_state.html" with title="No conversations yet" message="Start a conversation with another gamer." action_url="messaging:user-list" action_text="Find a player" %}
     {% endif %}
 </div>
 {% endblock %}
