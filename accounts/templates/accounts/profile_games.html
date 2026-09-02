@@ -35,7 +35,7 @@
             {% endif %}
         </article>
         {% empty %}
-        <p class="text-sm text-slate-600">No games added yet.</p>
+            {% include "components/empty_state.html" with title="No games added yet" message="Add games to your profile to show what you play." %}
         {% endfor %}
     </div>
 </section>

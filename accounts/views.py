@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -5,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ProfileForm, ProfileGameForm, SignupForm
 from .models import ProfileGame
+from .tasks import send_welcome_email
 
 
 def profile_detail(request, username):
@@ -58,11 +60,33 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("core:home")
+            request.session["onboarding_required"] = True
+            send_welcome_email.delay(user.pk)
+            return redirect("accounts:profile-setup")
     else:
         form = SignupForm()
 
     return render(request, "accounts/signup.html", {"form": form})
+
+
+@login_required
+def profile_setup(request):
+    if request.method == "POST":
+        if "skip" in request.POST:
+            request.session.pop("onboarding_required", None)
+            messages.info(request, "You can finish your profile later from your account page.")
+            return redirect("core:home")
+
+        form = ProfileForm(request.POST, request.FILES or None, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            request.session.pop("onboarding_required", None)
+            messages.success(request, "Your profile is ready.")
+            return redirect("core:home")
+    else:
+        form = ProfileForm(instance=request.user.profile)
+
+    return render(request, "accounts/profile_setup.html", {"form": form})
 
 
 def profile(request, username):

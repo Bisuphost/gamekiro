@@ -73,6 +73,11 @@ class ReactionTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "1")
 
+    def test_base_template_sets_htmx_csrf_header(self):
+        response = self.client.get(reverse("forum:thread_detail", args=[self.category.slug, self.thread.slug]))
+        self.assertContains(response, "htmx:configRequest")
+        self.assertContains(response, "X-CSRFToken")
+
     def test_count_correct_across_multiple_users(self):
         url = self._toggle_url("forum", "post", self.post.pk)
         self.client.post(url)

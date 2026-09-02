@@ -3,9 +3,16 @@
 {% block title %}Page not found{% endblock %}
 
 {% block content %}
-<div class="text-center py-16">
-    <h1 class="text-3xl font-bold mb-4">404</h1>
-    <p class="text-slate-600 mb-6">That page doesn't exist.</p>
-    <a href="{% url 'core:home' %}" class="text-sm underline">Back home</a>
+<div class="mx-auto max-w-lg py-16 text-center">
+    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">404</p>
+    <h1 class="mt-4 text-4xl font-bold tracking-tight text-slate-900">Page not found</h1>
+    <p class="mt-4 text-base text-slate-600">
+        The page you're looking for doesn't exist or may have been moved.
+    </p>
+    <div class="mt-8">
+        <a href="{% url 'core:home' %}" class="inline-flex rounded bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700">
+            Go home
+        </a>
+    </div>
 </div>
 {% endblock %}
