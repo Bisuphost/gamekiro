@@ -13,6 +13,8 @@
     <p class="text-slate-600 mb-6">{{ profile_user.profile.bio }}</p>
     {% endif %}
 
+    {% include "accounts/profile_stats.html" %}
+
     <dl class="grid grid-cols-2 gap-4 text-sm">
         {% if profile_user.profile.discord_username %}
         <div>
@@ -39,5 +41,6 @@
         </div>
         {% endif %}
     </dl>
+    {% include "accounts/profile_games.html" %}
 </div>
 {% endblock %}

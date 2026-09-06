@@ -22,3 +22,23 @@ class Message(models.Model):
 
 	def __str__(self):
 		return f"Message from {self.sender} to {self.recipient}"
+
+
+class ConversationArchive(models.Model):
+	user = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name="archived_conversations",
+	)
+	partner = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name="conversation_archives",
+	)
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		constraints = [
+			models.UniqueConstraint(fields=["user", "partner"], name="unique_conversation_archive")
+		]
+		indexes = [models.Index(fields=["user", "partner"])]

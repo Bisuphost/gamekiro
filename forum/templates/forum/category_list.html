@@ -15,9 +15,7 @@
         {% endif %}
     </a>
     {% empty %}
-    <div class="rounded-lg border border-dashed border-slate-300 py-12 text-center text-slate-500">
-        No categories yet.
-    </div>
+        {% include "components/empty_state.html" with title="No categories yet" message="Check back soon as the community starts sharing discussions." %}
     {% endfor %}
 </div>
 {% endblock %}

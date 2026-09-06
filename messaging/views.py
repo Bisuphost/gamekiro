@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -10,13 +10,29 @@ from notifications.models import Notification
 from notifications.services import notify
 
 from .forms import MessageForm
-from .models import Message
+from .models import ConversationArchive, Message
 
 
 @login_required
 def inbox(request):
 	messages = (
 		Message.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
+		.exclude(
+			Exists(
+				ConversationArchive.objects.filter(
+					user=request.user,
+					partner=OuterRef("sender"),
+					created_at__gte=OuterRef("created_at"),
+				)
+			)
+			| Exists(
+				ConversationArchive.objects.filter(
+					user=request.user,
+					partner=OuterRef("recipient"),
+					created_at__gte=OuterRef("created_at"),
+				)
+			)
+		)
 		.select_related("sender", "recipient")
 	)
 	conversations = OrderedDict()
@@ -57,6 +73,7 @@ def conversation(request, username):
 	partner = get_object_or_404(User, username=username)
 	if partner == request.user:
 		raise Http404
+	ConversationArchive.objects.filter(user=request.user, partner=partner).delete()
 
 	Message.objects.filter(
 		sender=partner,
@@ -71,6 +88,19 @@ def conversation(request, username):
 		"messaging/conversation.html",
 		{"partner": partner, "messages": messages, "form": MessageForm()},
 	)
+
+
+@login_required
+def archive_conversation(request, username):
+	partner = get_object_or_404(User, username=username)
+	if partner == request.user or not Message.objects.filter(
+		Q(sender=request.user, recipient=partner) | Q(sender=partner, recipient=request.user)
+	).exists():
+		raise Http404
+	if request.method == "POST":
+		ConversationArchive.objects.get_or_create(user=request.user, partner=partner)
+		Message.objects.filter(recipient=request.user, sender=partner, is_read=False).update(is_read=True)
+	return redirect("messaging:inbox")
 
 
 @login_required
@@ -108,5 +138,13 @@ def send_message(request, username):
 
 @login_required
 def unread_count(request):
-	count = Message.objects.filter(recipient=request.user, is_read=False).count()
+	count = Message.objects.filter(recipient=request.user, is_read=False).exclude(
+		Exists(
+			ConversationArchive.objects.filter(
+				user=request.user,
+				partner=OuterRef("sender"),
+				created_at__gte=OuterRef("created_at"),
+			)
+		)
+	).count()
 	return render(request, "messaging/_unread_count.html", {"unread_count": count})

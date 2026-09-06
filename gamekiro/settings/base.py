@@ -12,6 +12,9 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="django-insecure-changeme-in-prod")
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@gamekiro.local")
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+SITE_URL = env("SITE_URL", default="http://localhost:8000")
 
 
 DJANGO_APPS = [
