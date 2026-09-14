@@ -3,7 +3,7 @@
 import django.contrib.postgres.indexes
 import django.contrib.postgres.search
 from django.conf import settings
-from django.db import migrations, models
+from django.db import connection, migrations, models
 
 
 class Migration(migrations.Migration):
@@ -13,20 +13,29 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
-    operations = [
-        migrations.AddField(
-            model_name="thread",
-            name="title_search_vector",
-            field=models.GeneratedField(
-                db_persist=True,
-                expression=django.contrib.postgres.search.SearchVector("title", config="english"),
-                output_field=django.contrib.postgres.search.SearchVectorField(),
+    # title_search_vector / GinIndex are PostgreSQL-only (see forum/models.py).
+    # No-op on other backends so migration state matches the conditional
+    # model field.
+    operations = (
+        [
+            migrations.AddField(
+                model_name="thread",
+                name="title_search_vector",
+                field=models.GeneratedField(
+                    db_persist=True,
+                    expression=django.contrib.postgres.search.SearchVector(
+                        "title", config="english"
+                    ),
+                    output_field=django.contrib.postgres.search.SearchVectorField(),
+                ),
             ),
-        ),
-        migrations.AddIndex(
-            model_name="thread",
-            index=django.contrib.postgres.indexes.GinIndex(
-                fields=["title_search_vector"], name="thread_title_search_idx"
+            migrations.AddIndex(
+                model_name="thread",
+                index=django.contrib.postgres.indexes.GinIndex(
+                    fields=["title_search_vector"], name="thread_title_search_idx"
+                ),
             ),
-        ),
-    ]
+        ]
+        if connection.vendor == "postgresql"
+        else []
+    )

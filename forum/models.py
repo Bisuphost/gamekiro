@@ -1,9 +1,18 @@
 from django.conf import settings
-from django.contrib.postgres.indexes import GinIndex
-from django.contrib.postgres.search import SearchVector, SearchVectorField
-from django.db import models
+from django.db import connection, models
 
 from core.validators import validate_image_file_size
+
+# Full-text search (title_search_vector / GinIndex) is a PostgreSQL-only
+# feature. It's defined conditionally so the app still runs against other
+# backends (e.g. SQLite, used as a fallback where PostgreSQL 14+ isn't
+# available) — full-text search then falls back to a plain icontains filter
+# in forum/views.py.
+POSTGRES = connection.vendor == "postgresql"
+
+if POSTGRES:
+    from django.contrib.postgres.indexes import GinIndex
+    from django.contrib.postgres.search import SearchVector, SearchVectorField
 
 
 class Category(models.Model):
@@ -30,11 +39,12 @@ class Thread(models.Model):
     is_pinned = models.BooleanField(default=False)
     is_locked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    title_search_vector = models.GeneratedField(
-        expression=SearchVector("title", config="english"),
-        output_field=SearchVectorField(),
-        db_persist=True,
-    )
+    if POSTGRES:
+        title_search_vector = models.GeneratedField(
+            expression=SearchVector("title", config="english"),
+            output_field=SearchVectorField(),
+            db_persist=True,
+        )
 
     class Meta:
         ordering = ["-is_pinned", "-created_at"]
@@ -43,9 +53,11 @@ class Thread(models.Model):
                 fields=["category", "slug"], name="unique_thread_slug_per_category"
             )
         ]
-        indexes = [
-            GinIndex(fields=["title_search_vector"], name="thread_title_search_idx"),
-        ]
+        indexes = (
+            [GinIndex(fields=["title_search_vector"], name="thread_title_search_idx")]
+            if POSTGRES
+            else []
+        )
 
     def __str__(self):
         return self.title

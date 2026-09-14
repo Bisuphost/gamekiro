@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.postgres.search import SearchQuery, SearchRank
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import F
@@ -16,8 +15,23 @@ from notifications.services import notify
 from reactions.services import has_reacted, liked_pks_for, reaction_count, reaction_counts_for
 
 from .forms import PostForm, PostImageUploadForm, ThreadCreateAnyForm, ThreadForm
-from .models import Category, Post, PostImage, Thread
+from .models import POSTGRES, Category, Post, PostImage, Thread
 from .services import is_rate_limited
+
+if POSTGRES:
+    from django.contrib.postgres.search import SearchQuery, SearchRank
+
+
+def _search_filter(queryset, query):
+    """Rank by PostgreSQL full-text search where available, else icontains."""
+    if POSTGRES:
+        search_query = SearchQuery(query, config="english")
+        return (
+            queryset.filter(title_search_vector=search_query)
+            .annotate(rank=SearchRank(F("title_search_vector"), search_query))
+            .order_by("-rank")
+        )
+    return queryset.filter(title__icontains=query)
 
 THREADS_PER_PAGE = 20
 POSTS_PER_PAGE = 20
@@ -34,12 +48,7 @@ def category_detail(request, category_slug):
 
     query = request.GET.get("q", "").strip()
     if query:
-        search_query = SearchQuery(query, config="english")
-        thread_qs = (
-            thread_qs.filter(title_search_vector=search_query)
-            .annotate(rank=SearchRank(F("title_search_vector"), search_query))
-            .order_by("-rank")
-        )
+        thread_qs = _search_filter(thread_qs, query)
 
     status_filter = request.GET.get("filter", "")
     if status_filter not in ("pinned", "locked"):
@@ -67,13 +76,11 @@ def search(request):
     query = request.GET.get("q", "").strip()
     threads = Thread.objects.none()
     if query:
-        search_query = SearchQuery(query, config="english")
-        threads = (
-            Thread.objects.select_related("category", "author")
-            .exclude(pk__in=hidden_object_ids(Thread))
-            .filter(title_search_vector=search_query)
-            .annotate(rank=SearchRank(F("title_search_vector"), search_query))
-            .order_by("-rank")
+        threads = _search_filter(
+            Thread.objects.select_related("category", "author").exclude(
+                pk__in=hidden_object_ids(Thread)
+            ),
+            query,
         )
     paginator = Paginator(threads, THREADS_PER_PAGE)
     results = paginator.get_page(request.GET.get("page"))
