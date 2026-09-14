@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/gamekiro/gamekiro/
+    - /bin/cp -R accounts core docs forum gamekiro games gamification messaging moderation news notifications reactions reputation scripts social static static_src templates manage.py requirements.txt $DEPLOYPATH
+    - /home/gamekiro/virtualenv/gamekiro/3.13/bin/pip install -r $DEPLOYPATH/requirements.txt
