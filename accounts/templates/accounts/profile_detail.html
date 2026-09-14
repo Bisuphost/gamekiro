@@ -1,23 +1,7 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>{{ profile_user.username }} | Gamekiro</title></head>
-<body>
-<main>
-  <h1>{{ profile_user.username }}</h1>
-  {% if profile_user.profile.avatar %}<img src="{{ profile_user.profile.avatar.url }}" alt="{{ profile_user.username }} avatar" width="120">{% endif %}
-  <p>{{ profile_user.profile.bio|default:"No bio yet." }}</p>
-  {% include "accounts/profile_stats.html" %}
-  {% if profile_user.profile.discord_username %}<p>Discord: {{ profile_user.profile.discord_username }}</p>{% endif %}
-  {% if profile_user.profile.steam_id %}<p>Steam: {{ profile_user.profile.steam_id }}</p>{% endif %}
-  {% if profile_user.profile.psn_id %}<p>PSN: {{ profile_user.profile.psn_id }}</p>{% endif %}
-  {% if profile_user.profile.other_links %}<p><a href="{{ profile_user.profile.other_links }}">Other link</a></p>{% endif %}
-  {% if request.user.is_authenticated and request.user != profile_user %}
-    <form method="post" action="{% url 'social:toggle-follow' profile_user.username %}">
-      {% csrf_token %}<button type="submit">{% if request.user in profile_user.followers.all %}Unfollow{% else %}Follow{% endif %}</button>
-    </form>
-  {% endif %}
-  {% if request.user == profile_user %}<a href="{% url 'accounts:profile-edit' %}">Edit profile</a>{% endif %}
-  {% with profile_games=profile_user.profile.profile_games.all %}{% include "accounts/profile_games.html" %}{% endwith %}
-</main>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }}{% endblock %}
+
+{% block content %}
+{% include "accounts/_profile_body.html" %}
+{% endblock %}

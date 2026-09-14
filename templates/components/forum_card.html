@@ -1,0 +1,15 @@
+<a href="{% url 'forum:category_detail' category.slug %}"
+   class="glass-panel flex items-center gap-3 rounded-xl border border-border-subtle/60 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold text-text-primary">
+        {{ category.name|first|upper }}
+    </div>
+    <div class="min-w-0 flex-1">
+        <p class="truncate font-bold text-text-primary">{{ category.name }}</p>
+        {% if category.description %}
+        <p class="truncate text-sm text-text-secondary">{{ category.description }}</p>
+        {% endif %}
+    </div>
+    <span class="shrink-0 rounded-full bg-surface-elevated px-2.5 py-1 text-xs text-text-secondary">
+        {{ category.thread_count }} thread{{ category.thread_count|pluralize }}
+    </span>
+</a>

@@ -3,64 +3,64 @@
 {% block title %}{{ category.name }}{% endblock %}
 
 {% block content %}
-<div class="text-sm text-slate-500 mb-4">
-    <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a>
+<div class="mb-4 text-sm text-text-secondary">
+    <a href="{% url 'forum:category_list' %}" class="hover:text-text-primary">Forum</a>
     <span class="mx-1">/</span>
     {{ category.name }}
 </div>
 
-<div class="flex items-start justify-between gap-4 mb-2">
-    <h1 class="text-2xl font-bold text-slate-900">{{ category.name }}</h1>
+<div class="mb-2 flex items-start justify-between gap-4">
+    <h1 class="text-2xl font-bold text-text-primary">{{ category.name }}</h1>
     {% if user.is_authenticated %}
     <a href="{% url 'forum:thread_create' category.slug %}"
-       class="shrink-0 rounded-md bg-slate-900 text-white py-2 px-4 text-sm font-medium hover:bg-slate-700 transition">
+       class="shrink-0 rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
         New thread
     </a>
     {% else %}
     <a href="{% url 'login' %}?next={% url 'forum:thread_create' category.slug %}"
-       class="shrink-0 text-sm text-slate-600 underline underline-offset-2 hover:text-slate-900">
+       class="shrink-0 text-sm text-text-secondary underline underline-offset-2 hover:text-text-primary">
         Log in to post
     </a>
     {% endif %}
 </div>
 {% if category.description %}
-<p class="text-slate-600 mb-6">{{ category.description }}</p>
+<p class="mb-6 text-text-secondary">{{ category.description }}</p>
 {% else %}
 <div class="mb-6"></div>
 {% endif %}
 
 <form method="get" class="mb-4 flex flex-wrap items-center gap-3">
-    <input type="text" name="q" value="{{ query }}" placeholder="Search threads…"
-           class="w-full sm:w-64 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search threads&hellip;"
+           class="w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end sm:w-64">
     {% if status_filter %}<input type="hidden" name="filter" value="{{ status_filter }}">{% endif %}
     <div class="flex items-center gap-1 text-sm">
-        <a href="?q={{ query|urlencode }}" class="rounded-full px-3 py-1 {% if not status_filter %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">All</a>
-        <a href="?q={{ query|urlencode }}&filter=pinned" class="rounded-full px-3 py-1 {% if status_filter == "pinned" %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">Pinned</a>
-        <a href="?q={{ query|urlencode }}&filter=locked" class="rounded-full px-3 py-1 {% if status_filter == "locked" %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">Locked</a>
+        <a href="?q={{ query|urlencode }}" class="rounded-full px-3 py-1 {% if not status_filter %}bg-accent-start text-text-primary{% else %}text-text-secondary hover:bg-surface{% endif %}">All</a>
+        <a href="?q={{ query|urlencode }}&filter=pinned" class="rounded-full px-3 py-1 {% if status_filter == "pinned" %}bg-accent-start text-text-primary{% else %}text-text-secondary hover:bg-surface{% endif %}">Pinned</a>
+        <a href="?q={{ query|urlencode }}&filter=locked" class="rounded-full px-3 py-1 {% if status_filter == "locked" %}bg-accent-start text-text-primary{% else %}text-text-secondary hover:bg-surface{% endif %}">Locked</a>
     </div>
-    <button type="submit" class="rounded-md bg-slate-900 text-white py-2 px-4 text-sm font-medium hover:bg-slate-700 transition">Search</button>
+    <button type="submit" class="rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">Search</button>
 </form>
 
-<div class="rounded-lg border border-slate-200 bg-white divide-y divide-slate-200 overflow-hidden">
+<div class="glass-panel divide-y divide-border-subtle overflow-hidden rounded-xl border border-border-subtle/60">
     {% for thread in threads %}
     <a href="{% url 'forum:thread_detail' category.slug thread.slug %}"
-       class="flex items-start justify-between gap-4 p-4 hover:bg-slate-50 transition">
+       class="flex items-start justify-between gap-4 p-4 transition hover:bg-surface-elevated/60">
         <div class="min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex flex-wrap items-center gap-2">
                 {% if thread.is_pinned %}
-                <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5">Pinned</span>
+                <span class="inline-flex items-center rounded-full bg-accent-start/20 px-2 py-0.5 text-xs font-medium text-accent-end">Pinned</span>
                 {% endif %}
                 {% if thread.is_locked %}
-                <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-600 text-xs font-medium px-2 py-0.5">Locked</span>
+                <span class="inline-flex items-center rounded-full bg-surface-elevated px-2 py-0.5 text-xs font-medium text-text-secondary">Locked</span>
                 {% endif %}
-                <span class="font-medium text-slate-900 truncate">{{ thread.title }}</span>
+                <span class="truncate font-bold text-text-primary">{{ thread.title }}</span>
             </div>
-            <p class="text-sm text-slate-500 mt-1">by {{ thread.author.username }}</p>
+            <p class="mt-1 text-sm text-text-secondary">by {{ thread.author.username }}</p>
         </div>
-        <span class="shrink-0 text-sm text-slate-400 whitespace-nowrap">{{ thread.created_at|date:"M j, Y" }}</span>
+        <span class="shrink-0 whitespace-nowrap text-sm text-text-secondary">{{ thread.created_at|date:"M j, Y" }}</span>
     </a>
     {% empty %}
-    <div class="py-12 text-center text-slate-500">
+    <div class="py-12 text-center text-text-secondary">
         {% if query or status_filter %}No threads match your search.{% else %}No threads yet — be the first to post.{% endif %}
     </div>
     {% endfor %}
@@ -69,17 +69,17 @@
 {% if threads.paginator.num_pages > 1 %}
 <nav class="mt-6 flex items-center justify-between text-sm">
     {% if threads.has_previous %}
-    <a href="?page={{ threads.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if status_filter %}&filter={{ status_filter|urlencode }}{% endif %}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">&larr; Previous</a>
+    <a href="?page={{ threads.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if status_filter %}&filter={{ status_filter|urlencode }}{% endif %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">&larr; Previous</a>
     {% else %}
-    <span class="text-slate-300">&larr; Previous</span>
+    <span class="text-text-secondary/40">&larr; Previous</span>
     {% endif %}
 
-    <span class="text-slate-500">Page {{ threads.number }} of {{ threads.paginator.num_pages }}</span>
+    <span class="text-text-secondary">Page {{ threads.number }} of {{ threads.paginator.num_pages }}</span>
 
     {% if threads.has_next %}
-    <a href="?page={{ threads.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if status_filter %}&filter={{ status_filter|urlencode }}{% endif %}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">Next &rarr;</a>
+    <a href="?page={{ threads.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if status_filter %}&filter={{ status_filter|urlencode }}{% endif %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Next &rarr;</a>
     {% else %}
-    <span class="text-slate-300">Next &rarr;</span>
+    <span class="text-text-secondary/40">Next &rarr;</span>
     {% endif %}
 </nav>
 {% endif %}

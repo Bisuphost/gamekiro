@@ -1,0 +1,15 @@
+<a href="{% url 'accounts:profile' user_badge.user.username %}"
+   class="glass-panel flex items-center gap-3 rounded-xl border border-border-subtle/60 p-3 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+    {% if user_badge.user.profile.avatar %}
+    <img src="{{ user_badge.user.profile.avatar.url }}" alt="{{ user_badge.user.username }}"
+         class="h-9 w-9 shrink-0 rounded-full object-cover">
+    {% else %}
+    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold text-text-primary">
+        {{ user_badge.user.username|first|upper }}
+    </div>
+    {% endif %}
+    <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-bold text-text-primary">{{ user_badge.user.username }}</p>
+        <p class="truncate text-xs text-text-secondary">earned {{ user_badge.badge.name }}</p>
+    </div>
+</a>

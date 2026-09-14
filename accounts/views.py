@@ -3,14 +3,36 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from forum.models import Post
+from gamification.models import UserBadge
+from reputation.models import KarmaScore
 
 from .forms import ProfileForm, ProfileGameForm, SignupForm
 from .models import ProfileGame
 from .tasks import send_welcome_email
 
 
+@login_required
+def nav_stats(request):
+    karma_score = (
+        KarmaScore.objects.filter(user=request.user).values_list("score", flat=True).first() or 0
+    )
+    badge_count = UserBadge.objects.filter(user=request.user).count()
+    return render(
+        request,
+        "accounts/_nav_stats.html",
+        {"karma_score": karma_score, "badge_count": badge_count},
+    )
+
+
 def profile_detail(request, username):
     profile_user = get_object_or_404(User, username=username)
+    is_following = (
+        request.user.is_authenticated
+        and profile_user.followers.filter(follower=request.user).exists()
+    )
     return render(
         request,
         "accounts/profile_detail.html",
@@ -18,6 +40,8 @@ def profile_detail(request, username):
             "profile_user": profile_user,
             "profile_games": profile_user.profile.profile_games.select_related("game"),
             "profile_game_form": ProfileGameForm() if request.user == profile_user else None,
+            "post_count": Post.objects.filter(author=profile_user).count(),
+            "is_following": is_following,
         },
     )
 
@@ -34,21 +58,19 @@ def profile_edit(request):
 def followers(request, username):
     profile_user = get_object_or_404(User, username=username)
     users = User.objects.filter(following__following=profile_user).select_related("profile")
-    return render(
-        request,
-        "accounts/user_list.html",
-        {"profile_user": profile_user, "users": users, "list_type": "Followers"},
-    )
+    context = {"profile_user": profile_user, "users": users, "list_type": "Followers"}
+    if request.htmx:
+        return render(request, "accounts/_user_list_body.html", context)
+    return render(request, "accounts/user_list.html", context)
 
 
 def following(request, username):
     profile_user = get_object_or_404(User, username=username)
     users = User.objects.filter(followers__follower=profile_user).select_related("profile")
-    return render(
-        request,
-        "accounts/user_list.html",
-        {"profile_user": profile_user, "users": users, "list_type": "Following"},
-    )
+    context = {"profile_user": profile_user, "users": users, "list_type": "Following"}
+    if request.htmx:
+        return render(request, "accounts/_user_list_body.html", context)
+    return render(request, "accounts/user_list.html", context)
 
 
 def signup(request):
@@ -59,7 +81,9 @@ def signup(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            user.profile.terms_accepted_at = timezone.now()
+            user.profile.save(update_fields=["terms_accepted_at"])
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
             request.session["onboarding_required"] = True
             send_welcome_email.delay(user.pk)
             return redirect("accounts:profile-setup")
@@ -92,6 +116,10 @@ def profile_setup(request):
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
     profile_games = profile_user.profile.profile_games.select_related("game")
+    is_following = (
+        request.user.is_authenticated
+        and profile_user.followers.filter(follower=request.user).exists()
+    )
     return render(
         request,
         "accounts/profile.html",
@@ -99,6 +127,8 @@ def profile(request, username):
             "profile_user": profile_user,
             "profile_games": profile_games,
             "profile_game_form": ProfileGameForm() if request.user == profile_user else None,
+            "post_count": Post.objects.filter(author=profile_user).count(),
+            "is_following": is_following,
         },
     )
 
@@ -123,6 +153,7 @@ def profile_game_add(request):
             "profile_user": request.user,
             "profile_games": profile_games,
             "profile_game_form": form,
+            "post_count": Post.objects.filter(author=request.user).count(),
         },
         status=400,
     )

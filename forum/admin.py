@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Post, Thread
+from .models import Category, Post, PostImage, Thread
 
 
 @admin.register(Category)
@@ -20,3 +20,9 @@ class ThreadAdmin(admin.ModelAdmin):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ["thread", "author", "created_at"]
+
+
+@admin.register(PostImage)
+class PostImageAdmin(admin.ModelAdmin):
+    list_display = ["uploader", "created_at"]
+    list_filter = ["uploader"]

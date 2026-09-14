@@ -1,0 +1,19 @@
+<a href="{% url 'games:detail' game.slug %}"
+   class="glass-panel flex items-center gap-4 rounded-xl border border-border-subtle/60 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+    {% if game.cover_image %}
+    <img src="{{ game.cover_image.url }}" alt="{{ game.title }}" class="h-16 w-16 shrink-0 rounded-lg object-cover">
+    {% else %}
+    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-surface-elevated text-lg font-bold text-text-primary">
+        {{ game.title|first|upper }}
+    </div>
+    {% endif %}
+    <div class="min-w-0 flex-1">
+        <p class="truncate font-bold text-text-primary">{{ game.title }}</p>
+        <div class="mt-1 flex items-center gap-2">
+            <div class="flex items-center text-sm text-accent-end" aria-label="{{ game.avg_rating|floatformat:1 }} out of 5 stars">
+                {% for i in "12345" %}<span aria-hidden="true">{% if forloop.counter <= game.rounded_rating %}&#9733;{% else %}&#9734;{% endif %}</span>{% endfor %}
+            </div>
+            <span class="text-xs text-text-secondary">{{ game.avg_rating|floatformat:1 }} &middot; {{ game.review_count }} review{{ game.review_count|pluralize }}</span>
+        </div>
+    </div>
+</a>

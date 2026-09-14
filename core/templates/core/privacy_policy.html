@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy | GameKiro{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-8 pb-16">
+    <div>
+        <h1 class="text-3xl font-bold text-text-primary">Privacy Policy</h1>
+        <p class="mt-2 text-sm text-text-secondary">Last updated: September 13, 2026</p>
+    </div>
+
+    <section class="space-y-3">
+        <p class="text-text-secondary">
+            GameKiro ("GameKiro", "we", "us", or "our") is operated by Cosmic Store LLC. This
+            Privacy Policy explains what personal data we collect when you use gamekiro.com
+            (the "Service"), why we collect it, and the choices you have. By using the Service
+            you agree to the practices described here.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">1. Information we collect</h2>
+        <p class="text-text-secondary">We only collect what we need to run the Service:</p>
+        <ul class="list-disc space-y-1 pl-6 text-text-secondary">
+            <li><span class="text-text-primary font-semibold">Account information</span> — username, email address, and a securely hashed password (we never store your password in plain text).</li>
+            <li><span class="text-text-primary font-semibold">Optional profile information</span> — anything you choose to add, such as a bio, avatar image, Discord/Steam/PSN usernames, or a personal website link. None of these fields are required.</li>
+            <li><span class="text-text-primary font-semibold">Content you create</span> — forum threads and posts, game reviews, direct messages, follows, and other activity you generate while using the Service.</li>
+            <li><span class="text-text-primary font-semibold">Technical data</span> — standard server logs (IP address, browser user-agent, timestamps) used for security, abuse prevention, and rate limiting. We do not use this data for advertising.</li>
+        </ul>
+        <p class="text-text-secondary">
+            We do not run any analytics or advertising trackers on GameKiro, and we do not
+            collect any data beyond what is listed above.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">2. How we use your information</h2>
+        <ul class="list-disc space-y-1 pl-6 text-text-secondary">
+            <li>To create and secure your account, and to keep you signed in.</li>
+            <li>To display your public profile, posts, and other content to other users, as intended by a community platform.</li>
+            <li>To send account-related emails (for example, a welcome email when you sign up). We do not send marketing email.</li>
+            <li>To detect and prevent abuse, spam, and unauthorized access (for example, rate limiting and login-attempt monitoring).</li>
+            <li>To operate error monitoring (Sentry) so we can find and fix bugs. Our error monitoring is configured not to collect personally identifiable request data.</li>
+        </ul>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">3. Cookies</h2>
+        <p class="text-text-secondary">
+            We use only two cookies, both required for the Service to function: a session
+            cookie that keeps you logged in, and a CSRF-protection cookie that helps secure
+            form submissions. Neither is used for tracking or advertising. See our
+            <a href="{% url 'core:cookies' %}" class="underline hover:text-text-primary">Cookie Policy</a>
+            for full details.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">4. Third parties we rely on</h2>
+        <ul class="list-disc space-y-1 pl-6 text-text-secondary">
+            <li><span class="text-text-primary font-semibold">Google Fonts</span> — loads a web font; this causes your browser to make a request to Google's servers.</li>
+            <li><span class="text-text-primary font-semibold">htmx (via a public CDN)</span> — a JavaScript library used for the site's interactive features.</li>
+            <li><span class="text-text-primary font-semibold">Cloud file storage</span> — uploaded images (avatars, cover images) are stored with our storage provider.</li>
+            <li><span class="text-text-primary font-semibold">Sentry</span> — error monitoring to help us catch and fix bugs, configured to exclude personal data by default.</li>
+        </ul>
+        <p class="text-text-secondary">We do not sell your personal data to anyone, ever.</p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">5. Your rights and choices</h2>
+        <p class="text-text-secondary">
+            Depending on where you live, you may have rights to access, correct, export, or
+            delete your personal data (for example, under the GDPR if you are in the EU/UK, or
+            the CCPA/CPRA if you are a California resident). We currently handle these requests
+            manually rather than through an automated self-service tool — to make a request,
+            email us at <a href="mailto:contact@gamekiro.com" class="underline hover:text-text-primary">contact@gamekiro.com</a>
+            and we will respond as required by applicable law. California residents: we do not
+            sell or share personal information as those terms are defined by the CCPA.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">6. Data retention</h2>
+        <p class="text-text-secondary">
+            We keep your account information and content for as long as your account is
+            active. If you ask us to delete your account, we will delete or anonymize your
+            personal data within a reasonable time, except where we're required to keep
+            certain records by law.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">7. Children's privacy</h2>
+        <p class="text-text-secondary">
+            GameKiro is not directed at children under 13, and we do not knowingly collect
+            personal data from anyone under 13. If you believe a child under 13 has created an
+            account, contact us and we will remove it.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">8. Security</h2>
+        <p class="text-text-secondary">
+            We use industry-standard measures to protect your data, including encrypted
+            connections (HTTPS), hashed passwords, and login-attempt monitoring. No system is
+            perfectly secure, so we can't guarantee absolute security, but we work to keep your
+            data safe.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">9. Changes to this policy</h2>
+        <p class="text-text-secondary">
+            If we make material changes to this Privacy Policy, we will update the "Last
+            updated" date above and, where appropriate, notify you.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">10. Contact us</h2>
+        <p class="text-text-secondary">
+            Cosmic Store LLC — <a href="mailto:contact@gamekiro.com" class="underline hover:text-text-primary">contact@gamekiro.com</a>
+        </p>
+    </section>
+</div>
+{% endblock %}

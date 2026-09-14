@@ -1,0 +1,234 @@
+{% load widget_tweaks %}
+<div>
+    <label class="mb-1 block text-sm font-medium text-text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    <div class="quill-dark rounded-lg border border-border-subtle bg-surface">
+        <div id="{{ field.id_for_label }}_editor" data-quill-target="{{ field.id_for_label }}" data-quill-placeholder="{{ placeholder|default:'' }}"></div>
+    </div>
+    {{ field|add_class:"hidden" }}
+    {% for error in field.errors %}
+    <p class="mt-1 text-sm text-red-400">{{ error }}</p>
+    {% endfor %}
+    <p class="quill-image-error mt-1 hidden text-sm text-red-400"></p>
+</div>
+
+<style>
+    .quill-dark .ql-toolbar.ql-snow {
+        border-color: #2A2A35;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+    }
+    .quill-dark .ql-container.ql-snow {
+        border-color: #2A2A35;
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.875rem;
+        min-height: 8rem;
+    }
+    .quill-dark .ql-editor {
+        color: #F2F2F5;
+        min-height: 8rem;
+    }
+    .quill-dark .ql-editor.ql-blank::before {
+        color: #9A9AA5;
+        font-style: normal;
+    }
+    .quill-dark .ql-snow .ql-stroke {
+        stroke: #9A9AA5;
+    }
+    .quill-dark .ql-snow .ql-fill {
+        fill: #9A9AA5;
+    }
+    .quill-dark .ql-snow .ql-picker {
+        color: #9A9AA5;
+    }
+    .quill-dark .ql-toolbar.ql-snow button:hover .ql-stroke,
+    .quill-dark .ql-toolbar.ql-snow button.ql-active .ql-stroke,
+    .quill-dark .ql-toolbar.ql-snow .ql-spoiler-button:hover,
+    .quill-dark .ql-toolbar.ql-snow .ql-spoiler-button.ql-active {
+        stroke: #A855F7;
+        color: #A855F7;
+    }
+    .quill-dark .ql-toolbar.ql-snow button:hover .ql-fill,
+    .quill-dark .ql-toolbar.ql-snow button.ql-active .ql-fill {
+        fill: #A855F7;
+    }
+    .quill-dark .ql-snow .ql-picker-options {
+        background-color: #17171F;
+        border-color: #2A2A35;
+    }
+    .quill-dark .ql-snow .ql-picker-label {
+        color: #9A9AA5;
+    }
+    .quill-dark .ql-spoiler-button {
+        font-weight: 700;
+        font-size: 0.7rem;
+        width: auto !important;
+        padding: 0 4px !important;
+    }
+    .quill-dark .ql-editor img {
+        max-width: 100%;
+        border-radius: 0.5rem;
+    }
+    .quill-dark .ql-editor iframe {
+        max-width: 100%;
+        aspect-ratio: 16 / 9;
+        width: 100%;
+        border-radius: 0.5rem;
+    }
+    .quill-dark .ql-editor .ql-spoiler-true {
+        background-color: #2A2A35;
+        color: transparent;
+        border-radius: 0.2em;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var container = document.getElementById('{{ field.id_for_label }}_editor');
+        if (!container || typeof Quill === 'undefined') return;
+
+        if (!Quill.imports['formats/spoiler']) {
+            var Parchment = Quill.import('parchment');
+            var SpoilerAttributor = new Parchment.Attributor.Class('spoiler', 'ql-spoiler', {
+                scope: Parchment.Scope.INLINE,
+            });
+            Quill.register(SpoilerAttributor, true);
+
+            var icons = Quill.import('ui/icons');
+            icons['spoiler'] = '<span class="ql-spoiler-button">!</span>';
+        }
+
+        var textarea = document.getElementById('{{ field.id_for_label }}');
+        var errorEl = container.parentElement.parentElement.querySelector('.quill-image-error');
+
+        function getCsrfToken() {
+            var match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+            return match ? decodeURIComponent(match[1]) : '';
+        }
+
+        function showImageError(message) {
+            if (!errorEl) return;
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+
+        function clearImageError() {
+            if (!errorEl) return;
+            errorEl.classList.add('hidden');
+        }
+
+        function toEmbedUrl(rawUrl) {
+            var url;
+            try {
+                url = new URL(rawUrl);
+            } catch (e) {
+                return null;
+            }
+            var host = url.hostname.replace(/^www\./, '');
+            if (host === 'youtube.com') {
+                var videoId = url.searchParams.get('v');
+                if (videoId) return 'https://www.youtube.com/embed/' + videoId;
+                return null;
+            }
+            if (host === 'youtu.be') {
+                var id = url.pathname.slice(1);
+                if (id) return 'https://www.youtube.com/embed/' + id;
+                return null;
+            }
+            if (host === 'vimeo.com') {
+                var vimeoId = url.pathname.slice(1);
+                if (/^\d+$/.test(vimeoId)) return 'https://player.vimeo.com/video/' + vimeoId;
+                return null;
+            }
+            return null;
+        }
+
+        var quill = new Quill(container, {
+            theme: 'snow',
+            placeholder: container.dataset.quillPlaceholder || '',
+            modules: {
+                toolbar: {
+                    container: [
+                        ['link', 'image', 'video'],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ script: 'sub' }, { script: 'super' }],
+                        [{ header: [1, 2, 3, false] }],
+                        ['blockquote', 'code', 'code-block'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['spoiler'],
+                        ['clean'],
+                    ],
+                    handlers: {
+                        image: function () {
+                            clearImageError();
+                            var input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.addEventListener('change', function () {
+                                var file = input.files[0];
+                                if (!file) return;
+                                var range = quill.getSelection(true);
+                                var formData = new FormData();
+                                formData.append('image', file);
+                                fetch('{% url "forum:upload_post_image" %}', {
+                                    method: 'POST',
+                                    headers: { 'X-CSRFToken': getCsrfToken() },
+                                    body: formData,
+                                })
+                                    .then(function (response) {
+                                        return response.json().then(function (data) {
+                                            return { ok: response.ok, data: data };
+                                        });
+                                    })
+                                    .then(function (result) {
+                                        if (!result.ok) {
+                                            showImageError(result.data.error || 'Image upload failed.');
+                                            return;
+                                        }
+                                        quill.insertEmbed(range.index, 'image', result.data.url, 'user');
+                                        quill.setSelection(range.index + 1);
+                                    })
+                                    .catch(function () {
+                                        showImageError('Image upload failed. Please try again.');
+                                    });
+                            });
+                            input.click();
+                        },
+                        video: function () {
+                            clearImageError();
+                            var rawUrl = window.prompt('Paste a YouTube or Vimeo link');
+                            if (!rawUrl) return;
+                            var embedUrl = toEmbedUrl(rawUrl);
+                            if (!embedUrl) {
+                                showImageError('Only YouTube and Vimeo links can be embedded.');
+                                return;
+                            }
+                            var range = quill.getSelection(true);
+                            quill.insertEmbed(range.index, 'video', embedUrl, 'user');
+                            quill.setSelection(range.index + 1);
+                        },
+                        spoiler: function () {
+                            var range = quill.getSelection();
+                            if (!range || range.length === 0) return;
+                            var isSpoiler = !!quill.getFormat(range).spoiler;
+                            quill.formatText(range, 'spoiler', !isSpoiler, 'user');
+                        },
+                    },
+                },
+            },
+        });
+        if (textarea.value) {
+            quill.root.innerHTML = textarea.value;
+        }
+        quill.on('text-change', function () {
+            textarea.value = quill.root.innerHTML;
+        });
+        var form = textarea.closest('form');
+        if (form) {
+            form.addEventListener('submit', function () {
+                textarea.value = quill.root.innerHTML;
+            });
+        }
+    });
+</script>

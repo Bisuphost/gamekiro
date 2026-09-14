@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}News{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl">
+    <h1 class="mb-6 text-2xl font-bold text-text-primary">News</h1>
+
+    <div class="space-y-4">
+        {% for article in articles %}
+        <a href="{% url 'news:detail' article.slug %}"
+           class="glass-panel flex gap-4 rounded-xl border border-border-subtle/60 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+            {% if article.cover_image %}
+            <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" class="h-24 w-32 shrink-0 rounded-lg object-cover">
+            {% else %}
+            <div class="h-24 w-32 shrink-0 rounded-lg bg-surface-elevated"></div>
+            {% endif %}
+            <div class="min-w-0">
+                <p class="font-bold text-text-primary">{{ article.title }}</p>
+                {% if article.summary %}
+                <p class="mt-1 line-clamp-2 text-sm text-text-secondary">{{ article.summary }}</p>
+                {% endif %}
+                <p class="mt-2 text-xs text-text-secondary">
+                    {% if article.author %}{{ article.author.username }} &middot; {% endif %}{{ article.published_at|date:"M j, Y" }}
+                </p>
+            </div>
+        </a>
+        {% empty %}
+        {% include "components/empty_state.html" with title="No news yet" message="Check back soon for community updates." %}
+        {% endfor %}
+    </div>
+
+    {% if articles.has_other_pages %}
+    <div class="mt-6 flex items-center gap-4 text-sm text-text-secondary">
+        {% if articles.has_previous %}
+        <a href="?page={{ articles.previous_page_number }}" class="hover:text-text-primary">Previous</a>
+        {% endif %}
+        <span>Page {{ articles.number }} of {{ articles.paginator.num_pages }}</span>
+        {% if articles.has_next %}
+        <a href="?page={{ articles.next_page_number }}" class="hover:text-text-primary">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

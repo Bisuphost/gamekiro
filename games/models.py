@@ -3,6 +3,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from taggit.managers import TaggableManager
 
+from core.validators import validate_image_file_size
+
 
 class Platform(models.Model):
 	name = models.CharField(max_length=100, unique=True)
@@ -19,7 +21,9 @@ class Game(models.Model):
 	title = models.CharField(max_length=200)
 	slug = models.SlugField(max_length=200, unique=True)
 	description = models.TextField(blank=True)
-	cover_image = models.ImageField(upload_to="game_covers/", blank=True, null=True)
+	cover_image = models.ImageField(
+		upload_to="game_covers/", blank=True, null=True, validators=[validate_image_file_size]
+	)
 	platforms = models.ManyToManyField(Platform, related_name="games", blank=True)
 	tags = TaggableManager(blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)

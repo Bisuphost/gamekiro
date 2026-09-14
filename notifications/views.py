@@ -8,6 +8,7 @@ from .models import Notification
 from .services import attach_targets
 
 NOTIFICATIONS_PER_PAGE = 20
+RECENT_NOTIFICATIONS_LIMIT = 8
 
 
 @login_required
@@ -15,6 +16,13 @@ def notification_list(request):
     notification_qs = Notification.objects.filter(recipient=request.user).select_related(
         "actor", "content_type"
     )
+    if request.htmx:
+        recent = list(notification_qs[:RECENT_NOTIFICATIONS_LIMIT])
+        attach_targets(recent)
+        return render(
+            request, "notifications/_notification_list_body.html", {"notifications": recent}
+        )
+
     paginator = Paginator(notification_qs, NOTIFICATIONS_PER_PAGE)
     notifications = paginator.get_page(request.GET.get("page"))
     attach_targets(notifications.object_list)
@@ -27,6 +35,14 @@ def mark_read(request, pk):
     notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
     notification.is_read = True
     notification.save(update_fields=["is_read"])
+
+    if request.htmx:
+        attach_targets([notification])
+        return render(
+            request,
+            "notifications/_notification_row.html",
+            {"notification": notification, "page_number": ""},
+        )
 
     page = request.POST.get("page", "")
     list_url = reverse("notifications:list")

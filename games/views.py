@@ -1,10 +1,26 @@
+from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
 
+from moderation.models import Report
+from moderation.services import hidden_object_ids
 from reactions.services import has_reacted, reaction_counts_for
 
 from .forms import ReviewForm
 from .models import Game, Platform, Review
+
+SEARCH_RESULTS_LIMIT = 8
+
+
+@login_required
+def game_search_autocomplete(request):
+	query = request.GET.get("q", "").strip()
+	games = Game.objects.none()
+	if query:
+		games = Game.objects.filter(title__icontains=query).order_by("title")[
+			:SEARCH_RESULTS_LIMIT
+		]
+	return render(request, "games/_game_search_results.html", {"games": games, "query": query})
 
 
 def game_list(request):
@@ -41,7 +57,11 @@ def game_review(request, game_id):
 
 
 def _game_review_context(request, game):
-	reviews = Review.objects.filter(game=game).select_related("user")
+	reviews = (
+		Review.objects.filter(game=game)
+		.exclude(pk__in=hidden_object_ids(Review))
+		.select_related("user")
+	)
 	review_list = list(reviews)
 	review_counts = reaction_counts_for(review_list)
 	for review in review_list:
@@ -81,5 +101,6 @@ def _game_review_context(request, game):
 			"review_count": len(review_list),
 			"review_form": review_form,
 			"user_review": user_review,
+			"report_reasons": Report.Reason.choices,
 		},
 	)

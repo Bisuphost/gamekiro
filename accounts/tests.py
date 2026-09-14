@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from games.models import Game
+from social.models import Follow
 
 from .models import Profile, ProfileGame
 
@@ -32,6 +33,15 @@ class ProfileTests(TestCase):
         self.assertContains(response, "0 followers")
         self.assertContains(response, "0 following")
 
+    def test_follow_button_reflects_actual_follow_state(self):
+        self.client.login(username="player", password="password123")
+        response = self.client.get(reverse("accounts:profile-detail", args=["rival"]))
+        self.assertNotContains(response, "Unfollow")
+
+        Follow.objects.create(follower=self.user, following=self.other)
+        response = self.client.get(reverse("accounts:profile-detail", args=["rival"]))
+        self.assertContains(response, "Unfollow")
+
     def test_signup_creates_a_profile_and_redirects_to_onboarding(self):
         with patch("accounts.tasks.send_welcome_email.delay") as mock_delay:
             response = self.client.post(
@@ -41,13 +51,31 @@ class ProfileTests(TestCase):
                     "email": "new-player@example.com",
                     "password1": "StrongPassword123!",
                     "password2": "StrongPassword123!",
+                    "agree_to_terms": True,
                 },
             )
 
         self.assertRedirects(response, reverse("accounts:profile-setup"))
         created_user = User.objects.get(username="new-player")
         self.assertTrue(Profile.objects.filter(user=created_user).exists())
+        self.assertIsNotNone(created_user.profile.terms_accepted_at)
         mock_delay.assert_called_once_with(created_user.pk)
+
+    def test_signup_requires_agreeing_to_terms(self):
+        with patch("accounts.tasks.send_welcome_email.delay") as mock_delay:
+            response = self.client.post(
+                reverse("accounts:signup"),
+                {
+                    "username": "no-consent",
+                    "email": "no-consent@example.com",
+                    "password1": "StrongPassword123!",
+                    "password2": "StrongPassword123!",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username="no-consent").exists())
+        mock_delay.assert_not_called()
 
     def test_new_user_is_prompted_for_onboarding_and_can_skip_setup(self):
         user = User.objects.create_user(username="onboarded", password="password123")
@@ -148,3 +176,18 @@ class ProfileGameTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertTrue(ProfileGame.objects.filter(pk=profile_game.pk).exists())
+
+    def test_profile_page_shows_a_game_search_input_not_a_dropdown(self):
+        self.client.login(username="player", password="password123")
+        response = self.client.get(reverse("accounts:profile", args=["player"]))
+        self.assertContains(response, 'id="game-search-input"')
+        self.assertContains(response, 'type="hidden" name="game"')
+
+    def test_adding_a_game_without_selecting_one_shows_a_helpful_error(self):
+        self.client.login(username="player", password="password123")
+        response = self.client.post(
+            reverse("accounts:profile-game-add"),
+            {"game": "", "status": ProfileGame.PLAYING},
+        )
+        self.assertContains(response, "Search and select a game first.", status_code=400)
+        self.assertFalse(ProfileGame.objects.exists())

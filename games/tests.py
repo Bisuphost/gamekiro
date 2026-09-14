@@ -44,6 +44,35 @@ class GameDirectoryTests(TestCase):
 		self.assertEqual(response.status_code, 404)
 
 
+class GameSearchAutocompleteTests(TestCase):
+	def setUp(self):
+		self.user = User.objects.create_user(username="player", password="password123")
+		Game.objects.create(title="Action Quest", slug="action-quest")
+		Game.objects.create(title="Strategy World", slug="strategy-world")
+
+	def test_requires_login(self):
+		response = self.client.get(reverse("games:search_autocomplete"), {"q": "quest"})
+		self.assertEqual(response.status_code, 302)
+		self.assertIn("/accounts/login", response.url)
+
+	def test_matches_partial_case_insensitive_title(self):
+		self.client.login(username="player", password="password123")
+		response = self.client.get(reverse("games:search_autocomplete"), {"q": "quest"})
+		self.assertContains(response, "Action Quest")
+		self.assertNotContains(response, "Strategy World")
+
+	def test_blank_query_returns_no_results(self):
+		self.client.login(username="player", password="password123")
+		response = self.client.get(reverse("games:search_autocomplete"), {"q": ""})
+		self.assertNotContains(response, "Action Quest")
+		self.assertNotContains(response, "Strategy World")
+
+	def test_no_match_shows_empty_message(self):
+		self.client.login(username="player", password="password123")
+		response = self.client.get(reverse("games:search_autocomplete"), {"q": "nonexistent"})
+		self.assertContains(response, "No games found")
+
+
 class ReviewTests(TestCase):
 	def setUp(self):
 		self.user = User.objects.create_user(username="player", password="password123")

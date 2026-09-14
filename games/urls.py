@@ -6,6 +6,7 @@ app_name = "games"
 
 urlpatterns = [
     path("games/", views.game_list, name="list"),
+    path("games/search/", views.game_search_autocomplete, name="search_autocomplete"),
     path("games/<int:game_id>/review/", views.game_review, name="review"),
     path("games/<slug:slug>/", views.game_detail, name="detail"),
 ]

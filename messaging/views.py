@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from django.contrib import messages as django_messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Exists, OuterRef, Q
@@ -11,6 +12,7 @@ from notifications.services import notify
 
 from .forms import MessageForm
 from .models import ConversationArchive, Message
+from .services import is_rate_limited
 
 
 @login_required
@@ -80,13 +82,13 @@ def conversation(request, username):
 		recipient=request.user,
 		is_read=False,
 	).update(is_read=True)
-	messages = Message.objects.filter(
+	conversation_messages = Message.objects.filter(
 		Q(sender=request.user, recipient=partner) | Q(sender=partner, recipient=request.user)
 	).select_related("sender", "recipient")
 	return render(
 		request,
 		"messaging/conversation.html",
-		{"partner": partner, "messages": messages, "form": MessageForm()},
+		{"partner": partner, "conversation_messages": conversation_messages, "form": MessageForm()},
 	)
 
 
@@ -111,6 +113,25 @@ def send_message(request, username):
 	if request.method != "POST":
 		return redirect("messaging:conversation", username=recipient.username)
 
+	if is_rate_limited(request.user):
+		django_messages.error(request, "You're sending messages too fast — please wait a moment.")
+		conversation_filter = Q(sender=request.user, recipient=recipient) | Q(
+			sender=recipient, recipient=request.user
+		)
+		conversation_messages = Message.objects.filter(conversation_filter).select_related(
+			"sender", "recipient"
+		)
+		return render(
+			request,
+			"messaging/conversation.html",
+			{
+				"partner": recipient,
+				"conversation_messages": conversation_messages,
+				"form": MessageForm(),
+			},
+			status=429,
+		)
+
 	form = MessageForm(request.POST)
 	if form.is_valid():
 		message = form.save(commit=False)
@@ -125,13 +146,13 @@ def send_message(request, username):
 		)
 		return redirect("messaging:conversation", username=recipient.username)
 
-	messages = Message.objects.filter(
+	conversation_messages = Message.objects.filter(
 		Q(sender=request.user, recipient=recipient) | Q(sender=recipient, recipient=request.user)
 	).select_related("sender", "recipient")
 	return render(
 		request,
 		"messaging/conversation.html",
-		{"partner": recipient, "messages": messages, "form": form},
+		{"partner": recipient, "conversation_messages": conversation_messages, "form": form},
 		status=400,
 	)
 

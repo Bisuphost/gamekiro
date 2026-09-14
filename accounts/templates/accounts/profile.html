@@ -1,46 +1,7 @@
 {% extends "base.html" %}
-{% load reputation_tags %}
-{% load gamification_tags %}
 
 {% block title %}{{ profile_user.username }}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold mb-2">{{ profile_user.username }}</h1>
-    <div class="mb-4">{% karma_badge profile_user %}</div>
-    <div class="mb-6">{% achievement_badges profile_user %}</div>
-    {% if profile_user.profile.bio %}
-    <p class="text-slate-600 mb-6">{{ profile_user.profile.bio }}</p>
-    {% endif %}
-
-    {% include "accounts/profile_stats.html" %}
-
-    <dl class="grid grid-cols-2 gap-4 text-sm">
-        {% if profile_user.profile.discord_username %}
-        <div>
-            <dt class="text-slate-500">Discord</dt>
-            <dd>{{ profile_user.profile.discord_username }}</dd>
-        </div>
-        {% endif %}
-        {% if profile_user.profile.steam_id %}
-        <div>
-            <dt class="text-slate-500">Steam</dt>
-            <dd>{{ profile_user.profile.steam_id }}</dd>
-        </div>
-        {% endif %}
-        {% if profile_user.profile.psn_id %}
-        <div>
-            <dt class="text-slate-500">PSN</dt>
-            <dd>{{ profile_user.profile.psn_id }}</dd>
-        </div>
-        {% endif %}
-        {% if profile_user.profile.website %}
-        <div>
-            <dt class="text-slate-500">Website</dt>
-            <dd><a href="{{ profile_user.profile.website }}" class="underline">{{ profile_user.profile.website }}</a></dd>
-        </div>
-        {% endif %}
-    </dl>
-    {% include "accounts/profile_games.html" %}
-</div>
+{% include "accounts/_profile_body.html" %}
 {% endblock %}

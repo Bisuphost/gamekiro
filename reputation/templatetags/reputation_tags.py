@@ -9,3 +9,8 @@ register = template.Library()
 def karma_badge(user):
     score = KarmaScore.objects.filter(user=user).values_list("score", flat=True).first() or 0
     return {"score": score}
+
+
+@register.simple_tag
+def karma_score(user):
+    return KarmaScore.objects.filter(user=user).values_list("score", flat=True).first() or 0

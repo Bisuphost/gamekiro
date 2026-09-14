@@ -1,0 +1,10 @@
+<div class="divide-y divide-border-subtle">
+    {% for notification in notifications %}
+        {% include "notifications/_notification_row.html" with notification=notification page_number="" %}
+    {% empty %}
+    <div class="py-10 text-center text-text-secondary">No notifications yet.</div>
+    {% endfor %}
+</div>
+<div class="border-t border-border-subtle p-3 text-center">
+    <a href="{% url 'notifications:list' %}" class="text-sm text-text-secondary hover:text-text-primary hover:underline">View all</a>
+</div>

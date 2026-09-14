@@ -4,6 +4,7 @@ from django.contrib.postgres.search import SearchQuery, SearchRank
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import F
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
@@ -14,8 +15,8 @@ from notifications.models import Notification
 from notifications.services import notify
 from reactions.services import has_reacted, liked_pks_for, reaction_count, reaction_counts_for
 
-from .forms import PostForm, ThreadForm
-from .models import Category, Post, Thread
+from .forms import PostForm, PostImageUploadForm, ThreadCreateAnyForm, ThreadForm
+from .models import Category, Post, PostImage, Thread
 from .services import is_rate_limited
 
 THREADS_PER_PAGE = 20
@@ -60,6 +61,23 @@ def category_detail(request, category_slug):
             "status_filter": status_filter,
         },
     )
+
+
+def search(request):
+    query = request.GET.get("q", "").strip()
+    threads = Thread.objects.none()
+    if query:
+        search_query = SearchQuery(query, config="english")
+        threads = (
+            Thread.objects.select_related("category", "author")
+            .exclude(pk__in=hidden_object_ids(Thread))
+            .filter(title_search_vector=search_query)
+            .annotate(rank=SearchRank(F("title_search_vector"), search_query))
+            .order_by("-rank")
+        )
+    paginator = Paginator(threads, THREADS_PER_PAGE)
+    results = paginator.get_page(request.GET.get("page"))
+    return render(request, "forum/search.html", {"query": query, "threads": results})
 
 
 def thread_detail(request, category_slug, thread_slug):
@@ -137,6 +155,36 @@ def thread_create(request, category_slug):
 
 
 @login_required
+def thread_create_any(request):
+    if request.method == "POST":
+        if is_rate_limited(request.user, Thread):
+            messages.error(
+                request,
+                "You're posting too fast — please wait a moment before creating another thread.",
+            )
+            return redirect("forum:category_list")
+        form = ThreadCreateAnyForm(request.POST)
+        if form.is_valid():
+            category = form.cleaned_data["category"]
+            with transaction.atomic():
+                thread = Thread.objects.create(
+                    category=category,
+                    author=request.user,
+                    title=form.cleaned_data["title"],
+                    slug=_unique_thread_slug(category, form.cleaned_data["title"]),
+                )
+                Post.objects.create(
+                    thread=thread, author=request.user, body=form.cleaned_data["body"]
+                )
+            return redirect(
+                "forum:thread_detail", category_slug=category.slug, thread_slug=thread.slug
+            )
+    else:
+        form = ThreadCreateAnyForm()
+    return render(request, "forum/thread_form_any.html", {"form": form})
+
+
+@login_required
 @require_POST
 def post_create(request, category_slug, thread_slug):
     thread = get_object_or_404(
@@ -167,3 +215,22 @@ def post_create(request, category_slug, thread_slug):
     else:
         messages.error(request, "Couldn't post your reply — please check the form.")
     return redirect("forum:thread_detail", category_slug=category_slug, thread_slug=thread_slug)
+
+
+@login_required
+@require_POST
+def upload_post_image(request):
+    if is_rate_limited(request.user, PostImage, field_name="uploader"):
+        return JsonResponse(
+            {"error": "You're uploading too fast — please wait a moment."}, status=429
+        )
+
+    form = PostImageUploadForm(request.POST, request.FILES)
+    if not form.is_valid():
+        error = next(iter(form.errors.get("image", ["Invalid image."])), "Invalid image.")
+        return JsonResponse({"error": error}, status=400)
+
+    post_image = form.save(commit=False)
+    post_image.uploader = request.user
+    post_image.save()
+    return JsonResponse({"url": post_image.image.url})

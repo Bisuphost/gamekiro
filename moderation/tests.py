@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from forum.models import Category, Post, Thread
+from games.models import Game, Review
 
 from .models import Report
 from .services import hidden_object_ids
@@ -96,6 +97,40 @@ class ReportViewTests(TestCase):
             {"reason": Report.Reason.SPAM, "next": target},
         )
         self.assertRedirects(response, target)
+
+
+class ReviewReportTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="player", password="password123")
+        self.other_user = User.objects.create_user(username="rival", password="password123")
+        self.game = Game.objects.create(title="Mirror Rift", slug="mirror-rift")
+        self.review = Review.objects.create(
+            user=self.user, game=self.game, rating=5, body="Great game"
+        )
+        self.client.login(username="rival", password="password123")
+
+    def _report_url(self, app_label, model_name, pk):
+        return reverse("moderation:report", args=[app_label, model_name, pk])
+
+    def test_report_creates_report_for_review(self):
+        response = self.client.post(
+            self._report_url("games", "review", self.review.pk), {"reason": Report.Reason.SPAM}
+        )
+        self.assertEqual(response.status_code, 302)
+        report = Report.objects.get()
+        self.assertEqual(report.target, self.review)
+
+    def test_hidden_review_is_excluded_from_game_detail(self):
+        content_type = ContentType.objects.get_for_model(Review)
+        Report.objects.create(
+            reporter=self.other_user,
+            content_type=content_type,
+            object_id=self.review.pk,
+            reason=Report.Reason.SPAM,
+            hides_target=True,
+        )
+        response = self.client.get(reverse("games:detail", args=[self.game.slug]))
+        self.assertNotContains(response, "Great game")
 
 
 class HiddenObjectIdsTests(TestCase):

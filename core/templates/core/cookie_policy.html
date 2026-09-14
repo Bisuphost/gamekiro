@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Cookie Policy | GameKiro{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-8 pb-16">
+    <div>
+        <h1 class="text-3xl font-bold text-text-primary">Cookie Policy</h1>
+        <p class="mt-2 text-sm text-text-secondary">Last updated: September 13, 2026</p>
+    </div>
+
+    <section class="space-y-3">
+        <p class="text-text-secondary">
+            This page explains what cookies GameKiro uses and why. We keep this deliberately
+            short, because we keep our cookie use deliberately minimal.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">Cookies we use</h2>
+        <p class="text-text-secondary">
+            GameKiro sets exactly two cookies, and both are strictly necessary for the
+            Service to work — we don't use any advertising, analytics, or tracking cookies.
+        </p>
+        <div class="overflow-x-auto rounded-xl border border-border-subtle">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-surface-elevated text-text-primary">
+                    <tr>
+                        <th class="px-4 py-2 font-semibold">Cookie</th>
+                        <th class="px-4 py-2 font-semibold">Purpose</th>
+                        <th class="px-4 py-2 font-semibold">Type</th>
+                    </tr>
+                </thead>
+                <tbody class="text-text-secondary">
+                    <tr class="border-t border-border-subtle">
+                        <td class="px-4 py-2 font-mono text-text-primary">sessionid</td>
+                        <td class="px-4 py-2">Keeps you logged in between page visits.</td>
+                        <td class="px-4 py-2">Strictly necessary</td>
+                    </tr>
+                    <tr class="border-t border-border-subtle">
+                        <td class="px-4 py-2 font-mono text-text-primary">csrftoken</td>
+                        <td class="px-4 py-2">Protects form submissions against cross-site request forgery.</td>
+                        <td class="px-4 py-2">Strictly necessary</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">Why we don't show a cookie consent banner</h2>
+        <p class="text-text-secondary">
+            Under laws like the EU/UK ePrivacy rules, cookies that are strictly necessary for a
+            service you've actively requested (like staying logged in, or securing a form
+            you're submitting) don't require an opt-in consent banner — only disclosure, which
+            is what this page provides. If we ever add cookies that aren't strictly necessary
+            (for example, analytics or advertising), we will add a consent banner before doing
+            so and update this policy first.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">Third-party resources</h2>
+        <p class="text-text-secondary">
+            Loading Google Fonts and the htmx JavaScript library (from a public CDN) causes
+            your browser to make direct requests to those providers, which may see your IP
+            address as a normal part of serving those files. Neither is used by us for
+            tracking, and neither sets a cookie on GameKiro's behalf.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">Managing cookies in your browser</h2>
+        <p class="text-text-secondary">
+            You can clear or block cookies at any time through your browser settings. Since our
+            two cookies are required for login and secure form submission, blocking them will
+            prevent you from staying signed in to GameKiro.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">Questions</h2>
+        <p class="text-text-secondary">
+            See our <a href="{% url 'core:privacy' %}" class="underline hover:text-text-primary">Privacy Policy</a>
+            for more detail, or contact us at
+            <a href="mailto:contact@gamekiro.com" class="underline hover:text-text-primary">contact@gamekiro.com</a>.
+        </p>
+    </section>
+</div>
+{% endblock %}

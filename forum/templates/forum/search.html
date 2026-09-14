@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{% if query %}Search: {{ query }}{% else %}Search{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl">
+    <h1 class="mb-6 text-2xl font-bold text-text-primary">
+        {% if query %}Search results for &ldquo;{{ query }}&rdquo;{% else %}Search{% endif %}
+    </h1>
+
+    {% if query %}
+    <div class="space-y-3">
+        {% for thread in threads %}
+        <a href="{% url 'forum:thread_detail' thread.category.slug thread.slug %}"
+           class="glass-panel block rounded-xl border border-border-subtle/60 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+            <p class="font-bold text-text-primary">{{ thread.title }}</p>
+            <p class="mt-1 text-sm text-text-secondary">{{ thread.author.username }} in {{ thread.category.name }} &middot; {{ thread.created_at|timesince }} ago</p>
+        </a>
+        {% empty %}
+        {% include "components/empty_state.html" with title="No results" message="Try a different search term." %}
+        {% endfor %}
+    </div>
+    {% if threads.has_other_pages %}
+    <div class="mt-6 flex items-center gap-4 text-sm text-text-secondary">
+        {% if threads.has_previous %}
+        <a href="?q={{ query }}&page={{ threads.previous_page_number }}" class="hover:text-text-primary">Previous</a>
+        {% endif %}
+        <span>Page {{ threads.number }} of {{ threads.paginator.num_pages }}</span>
+        {% if threads.has_next %}
+        <a href="?q={{ query }}&page={{ threads.next_page_number }}" class="hover:text-text-primary">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <p class="text-text-secondary">Enter a search term above to find threads across the forum.</p>
+    {% endif %}
+</div>
+{% endblock %}

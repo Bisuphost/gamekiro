@@ -1,24 +1,38 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 
 {% block title %}Sign up{% endblock %}
 
 {% block content %}
 <div class="max-w-sm mx-auto">
-    <h1 class="text-2xl font-bold mb-6">Create an account</h1>
+    <h1 class="text-2xl font-bold text-text-primary mb-6">Create an account</h1>
     <form method="post" class="space-y-4">
         {% csrf_token %}
         {{ form.non_field_errors }}
         {% for field in form %}
+        {% if field.name != "agree_to_terms" %}
         <div>
-            <label class="block text-sm font-medium mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {{ field.errors }}
+            <label class="block text-sm font-medium text-text-secondary mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end" }}
+            {% if field.help_text %}<p class="mt-1 text-xs text-text-secondary">{{ field.help_text }}</p>{% endif %}
+            {% for error in field.errors %}<p class="mt-1 text-sm text-red-400">{{ error }}</p>{% endfor %}
         </div>
+        {% endif %}
         {% endfor %}
-        <button type="submit" class="w-full rounded bg-slate-900 text-white py-2 text-sm">Sign up</button>
+        <div class="flex items-start gap-2">
+            {{ form.agree_to_terms|add_class:"mt-0.5 h-4 w-4 shrink-0 rounded border-border-subtle bg-surface focus:outline-none focus:ring-2 focus:ring-accent-end" }}
+            <label for="{{ form.agree_to_terms.id_for_label }}" class="text-sm text-text-secondary">
+                I am at least 13 years old and I agree to the
+                <a href="{% url 'core:terms' %}" target="_blank" rel="noopener" class="underline hover:text-text-primary">Terms of Service</a>
+                and
+                <a href="{% url 'core:privacy' %}" target="_blank" rel="noopener" class="underline hover:text-text-primary">Privacy Policy</a>.
+            </label>
+        </div>
+        {% for error in form.agree_to_terms.errors %}<p class="text-sm text-red-400">{{ error }}</p>{% endfor %}
+        <button type="submit" class="w-full rounded-lg bg-accent-start text-text-primary py-2 text-sm font-bold hover:brightness-110 transition">Sign up</button>
     </form>
     <div class="mt-4 text-sm">
-        <a href="{% url 'login' %}" class="underline">Already have an account?</a>
+        <a href="{% url 'login' %}" class="text-text-secondary underline hover:text-text-primary">Already have an account?</a>
     </div>
 </div>
 {% endblock %}

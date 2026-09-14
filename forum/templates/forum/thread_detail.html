@@ -3,25 +3,62 @@
 
 {% block title %}{{ thread.title }}{% endblock %}
 
+{% block extra_head %}
+{% if reply_form %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css"
+      integrity="sha384-Cr4NirNGPwhXoUPml2HA5PmMExeUuxM/oxUMDhMdSzUi9udHL+hdgDZZpq/2rOrp"
+      crossorigin="anonymous" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"
+        integrity="sha384-QUJ+ckWz1M+a7w0UfG1sEn4pPrbQwSxGm/1TIPyioqXBrwuT9l4f9gdHWLDLbVWI"
+        crossorigin="anonymous" defer></script>
+{% endif %}
+<style>
+    .post-body p { margin-bottom: 0.75em; }
+    .post-body p:last-child { margin-bottom: 0; }
+    .post-body ul, .post-body ol { margin: 0.5em 0 0.75em 1.5em; }
+    .post-body ul { list-style-type: disc; }
+    .post-body ol { list-style-type: decimal; }
+    .post-body blockquote { margin: 0.75em 0; padding-left: 1em; border-left: 3px solid #2A2A35; color: #9A9AA5; }
+    .post-body a { color: #A855F7; text-decoration: underline; text-underline-offset: 2px; }
+    .post-body code { background-color: #1C1C26; padding: 0.15em 0.4em; border-radius: 0.25rem; font-size: 0.85em; }
+    .post-body pre { background-color: #1C1C26; padding: 0.75em 1em; border-radius: 0.5rem; overflow-x: auto; margin: 0.75em 0; }
+    .post-body pre code { background: none; padding: 0; }
+    .post-body img { max-width: 100%; border-radius: 0.5rem; margin: 0.5em 0; }
+    .post-body iframe { max-width: 100%; width: 100%; aspect-ratio: 16 / 9; border-radius: 0.5rem; margin: 0.5em 0; border: none; }
+    .post-body .ql-spoiler-true { background-color: #2A2A35; color: transparent; border-radius: 0.2em; cursor: pointer; }
+    .post-body .ql-spoiler-true.is-revealed { background-color: transparent; color: inherit; cursor: text; }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.post-body .ql-spoiler-true').forEach(function (el) {
+            el.setAttribute('title', 'Click to reveal');
+            el.addEventListener('click', function () {
+                el.classList.toggle('is-revealed');
+            });
+        });
+    });
+</script>
+{% endblock %}
+
 {% block content %}
-<div class="text-sm text-slate-500 mb-4">
-    <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a>
+<div class="mb-4 text-sm text-text-secondary">
+    <a href="{% url 'forum:category_list' %}" class="hover:text-text-primary">Forum</a>
     <span class="mx-1">/</span>
-    <a href="{% url 'forum:category_detail' thread.category.slug %}" class="hover:underline">{{ thread.category.name }}</a>
+    <a href="{% url 'forum:category_detail' thread.category.slug %}" class="hover:text-text-primary">{{ thread.category.name }}</a>
     <span class="mx-1">/</span>
     {{ thread.title }}
 </div>
 
-<div class="flex items-center gap-2 flex-wrap mb-1">
+<div class="mb-1 flex flex-wrap items-center gap-2">
     {% if thread.is_pinned %}
-    <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5">Pinned</span>
+    <span class="inline-flex items-center rounded-full bg-accent-start/20 px-2 py-0.5 text-xs font-medium text-accent-end">Pinned</span>
     {% endif %}
     {% if thread.is_locked %}
-    <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-600 text-xs font-medium px-2 py-0.5">Locked</span>
+    <span class="inline-flex items-center rounded-full bg-surface-elevated px-2 py-0.5 text-xs font-medium text-text-secondary">Locked</span>
     {% endif %}
-    <h1 class="text-2xl font-bold text-slate-900">{{ thread.title }}</h1>
+    <h1 class="text-2xl font-bold text-text-primary">{{ thread.title }}</h1>
 </div>
-<p class="text-sm text-slate-500 mb-3">started by {{ thread.author.username }} &middot; {{ thread.created_at|date:"M j, Y" }}</p>
+<p class="mb-3 text-sm text-text-secondary">started by {{ thread.author.username }} &middot; {{ thread.created_at|date:"M j, Y" }}</p>
 
 <div class="mb-6">
     {% include "reactions/_like_button.html" with target_app="forum" target_model="thread" target_pk=thread.pk liked=thread.user_has_liked count=thread.like_count %}
@@ -29,72 +66,75 @@
 
 <div class="space-y-4">
     {% for post in posts %}
-    <div class="rounded-lg border border-slate-200 bg-white p-5">
-        <p class="text-sm text-slate-500 mb-2">
-            <span class="font-medium text-slate-700">{{ post.author.username }}</span>
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-5">
+        <p class="mb-2 text-sm text-text-secondary">
+            <span class="font-bold text-text-primary">{{ post.author.username }}</span>
             <span class="mx-1">&middot;</span>{{ post.created_at|date:"M j, Y, g:i a" }}
             {% if post.edited_at %}<span class="mx-1">&middot;</span>edited{% endif %}
         </p>
-        <div class="text-slate-800 leading-relaxed mb-3">{{ post.body|linebreaks }}</div>
+        <div class="post-body mb-3 leading-relaxed text-text-primary">{{ post.body|safe }}</div>
         <div class="flex items-center gap-3">
             {% include "reactions/_like_button.html" with target_app="forum" target_model="post" target_pk=post.pk liked=post.user_has_liked count=post.like_count %}
             {% if user.is_authenticated %}
             <form method="post" action="{% url 'moderation:report' 'forum' 'post' post.pk %}" class="flex items-center gap-1">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
-                <select name="reason" class="text-xs rounded border border-slate-300 py-0.5">
+                <select name="reason" class="rounded border border-border-subtle bg-surface py-0.5 text-xs text-text-secondary">
                     {% for value, label in report_reasons %}
                     <option value="{{ value }}">{{ label }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="text-xs text-slate-500 hover:text-slate-900 underline underline-offset-2">Report</button>
+                <button type="submit" class="text-xs text-text-secondary underline underline-offset-2 hover:text-text-primary">Report</button>
             </form>
             {% endif %}
         </div>
     </div>
     {% empty %}
-    <div class="rounded-lg border border-dashed border-slate-300 py-12 text-center text-slate-500">No posts yet.</div>
+    <div class="glass-panel rounded-xl border border-dashed border-border-subtle py-12 text-center text-text-secondary">No posts yet.</div>
     {% endfor %}
 </div>
 
 {% if posts.paginator.num_pages > 1 %}
 <nav class="mt-6 flex items-center justify-between text-sm">
     {% if posts.has_previous %}
-    <a href="?page={{ posts.previous_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">&larr; Previous</a>
+    <a href="?page={{ posts.previous_page_number }}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">&larr; Previous</a>
     {% else %}
-    <span class="text-slate-300">&larr; Previous</span>
+    <span class="text-text-secondary/40">&larr; Previous</span>
     {% endif %}
 
-    <span class="text-slate-500">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+    <span class="text-text-secondary">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
 
     {% if posts.has_next %}
-    <a href="?page={{ posts.next_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">Next &rarr;</a>
+    <a href="?page={{ posts.next_page_number }}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Next &rarr;</a>
     {% else %}
-    <span class="text-slate-300">Next &rarr;</span>
+    <span class="text-text-secondary/40">Next &rarr;</span>
     {% endif %}
 </nav>
 {% endif %}
 
-<div class="mt-8 pt-6 border-t border-slate-200 max-w-2xl">
+<div class="mt-8 max-w-2xl border-t border-border-subtle pt-6">
     {% if thread.is_locked %}
-    <p class="text-sm text-slate-500">This thread is locked — no new replies.</p>
+    <p class="text-sm text-text-secondary">This thread is locked — no new replies.</p>
     {% elif reply_form %}
     <form method="post" action="{% url 'forum:post_create' thread.category.slug thread.slug %}" class="space-y-4">
         {% csrf_token %}
         {{ reply_form.non_field_errors }}
         {% for field in reply_form %}
+        {% if field.name != "body" %}
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field|add_class:"w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900" }}
+            <label class="mb-1 block text-sm font-medium text-text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end" }}
             {% for error in field.errors %}
-            <p class="text-sm text-red-600 mt-1">{{ error }}</p>
+            <p class="mt-1 text-sm text-red-400">{{ error }}</p>
             {% endfor %}
         </div>
+        {% endif %}
         {% endfor %}
-        <button type="submit" class="rounded-md bg-slate-900 text-white py-2 px-4 text-sm font-medium hover:bg-slate-700 transition">Reply</button>
+        {% include "components/rich_text_field.html" with field=reply_form.body placeholder="Write a reply..." %}
+        <button type="submit" class="rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">Reply</button>
     </form>
     {% else %}
-    <a href="{% url 'login' %}?next={{ request.path }}" class="text-sm text-slate-600 underline underline-offset-2 hover:text-slate-900">Log in to reply</a>
+    <a href="{% url 'login' %}?next={{ request.path }}" class="text-sm text-text-secondary underline underline-offset-2 hover:text-text-primary">Log in to reply</a>
     {% endif %}
 </div>
 {% endblock %}

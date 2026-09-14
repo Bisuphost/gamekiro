@@ -8,3 +8,5 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.
 INSTALLED_APPS += ["django_extensions"]
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+AXES_ENABLED = False

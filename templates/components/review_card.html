@@ -1,0 +1,11 @@
+<a href="{% url 'games:detail' review.game.slug %}"
+   class="glass-panel block rounded-xl border border-border-subtle/60 p-3 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+    <div class="flex items-center justify-between gap-2">
+        <p class="truncate text-sm font-bold text-text-primary">{{ review.game.title }}</p>
+        <div class="flex shrink-0 items-center text-xs text-accent-end" aria-label="{{ review.rating }} out of 5 stars">
+            {% for i in "12345" %}<span aria-hidden="true">{% if forloop.counter <= review.rating %}&#9733;{% else %}&#9734;{% endif %}</span>{% endfor %}
+        </div>
+    </div>
+    <p class="mt-1 truncate text-xs text-text-secondary">{{ review.body|truncatechars:70 }}</p>
+    <p class="mt-1 text-xs text-text-secondary">&mdash; {{ review.user.username }}</p>
+</a>

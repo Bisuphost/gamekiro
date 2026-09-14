@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from core.models import TimestampedModel
+from core.validators import validate_image_file_size
 from games.models import Game
 
 
@@ -10,12 +11,15 @@ class Profile(TimestampedModel):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
     )
     bio = models.TextField(blank=True)
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    avatar = models.ImageField(
+        upload_to="avatars/", blank=True, null=True, validators=[validate_image_file_size]
+    )
     discord_username = models.CharField(max_length=64, blank=True)
     steam_id = models.CharField(max_length=64, blank=True)
     psn_id = models.CharField(max_length=64, blank=True)
     website = models.URLField(blank=True)
     other_links = models.URLField(blank=True)
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.user.username

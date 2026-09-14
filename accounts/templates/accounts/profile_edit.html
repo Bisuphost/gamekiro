@@ -1,12 +1,32 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Edit profile | Gamekiro</title></head>
-<body>
-<main><h1>Edit profile</h1>
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}{{ form.as_p }}<button type="submit">Save profile</button>
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Edit profile{% endblock %}
+
+{% block content %}
+<div class="text-sm text-text-secondary mb-4">
+    <a href="{% url 'accounts:profile-detail' request.user.username %}" class="hover:text-text-primary hover:underline">{{ request.user.username }}</a>
+    <span class="mx-1">/</span>
+    Edit profile
+</div>
+
+<h1 class="text-2xl font-bold text-text-primary mb-6">Edit profile</h1>
+
+<form method="post" enctype="multipart/form-data" class="space-y-4 max-w-2xl">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+    <div>
+        <label class="block text-sm font-medium text-text-secondary mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end" }}
+        {% for error in field.errors %}
+        <p class="text-sm text-red-400 mt-1">{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <div class="flex items-center gap-3">
+        <button type="submit" class="rounded-lg bg-accent-start text-text-primary py-2 px-4 text-sm font-bold hover:brightness-110 transition">Save profile</button>
+        <a href="{% url 'accounts:profile-detail' request.user.username %}" class="text-sm text-text-secondary underline underline-offset-2 hover:text-text-primary">Cancel</a>
+    </div>
 </form>
-<a href="{% url 'accounts:profile-detail' request.user.username %}">Cancel</a>
-</main>
-</body>
-</html>
+{% endblock %}

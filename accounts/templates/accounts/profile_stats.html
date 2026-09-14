@@ -1,5 +1,17 @@
-<dl class="grid grid-cols-3 gap-4 text-center text-sm">
-    <div><dt class="text-slate-500">Followers</dt><dd class="font-semibold"><a href="{% url 'accounts:followers' profile_user.username %}" class="hover:underline">{{ profile_user.followers.count }} followers</a></dd></div>
-    <div><dt class="text-slate-500">Following</dt><dd class="font-semibold"><a href="{% url 'accounts:following' profile_user.username %}" class="hover:underline">{{ profile_user.following.count }} following</a></dd></div>
-    <div><dt class="text-slate-500">Karma</dt><dd class="font-semibold">{{ karma_score|default:"0" }}</dd></div>
-</dl>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+    <span class="font-bold text-text-primary">{{ post_count|default:0 }} posts</span>
+    <a href="{% url 'accounts:followers' profile_user.username %}"
+       class="font-bold text-text-primary hover:underline"
+       data-profile-list-trigger="Followers"
+       hx-get="{% url 'accounts:followers' profile_user.username %}"
+       hx-target="#profile-list-modal-content" hx-swap="innerHTML">
+        {{ profile_user.followers.count }} followers
+    </a>
+    <a href="{% url 'accounts:following' profile_user.username %}"
+       class="font-bold text-text-primary hover:underline"
+       data-profile-list-trigger="Following"
+       hx-get="{% url 'accounts:following' profile_user.username %}"
+       hx-target="#profile-list-modal-content" hx-swap="innerHTML">
+        {{ profile_user.following.count }} following
+    </a>
+</div>

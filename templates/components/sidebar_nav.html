@@ -1,0 +1,67 @@
+<a href="{% url 'forum:thread_create_any' %}"
+   class="mb-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-text-primary px-3 py-2 text-sm font-bold text-bg-base transition hover:brightness-90">
+    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+    New Thread
+</a>
+
+<a href="{% url 'core:home' %}"
+   class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition hover:bg-surface hover:text-text-primary {% if request.resolver_match.app_name == 'core' %}bg-surface-elevated font-bold text-text-primary{% else %}text-text-secondary{% endif %}">
+    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+    </svg>
+    Home
+</a>
+<a href="{% url 'forum:category_list' %}"
+   class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition hover:bg-surface hover:text-text-primary {% if request.resolver_match.app_name == 'forum' %}bg-surface-elevated font-bold text-text-primary{% else %}text-text-secondary{% endif %}">
+    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+    </svg>
+    Forums
+</a>
+<a href="{% url 'games:list' %}"
+   class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition hover:bg-surface hover:text-text-primary {% if request.resolver_match.app_name == 'games' %}bg-surface-elevated font-bold text-text-primary{% else %}text-text-secondary{% endif %}">
+    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+    </svg>
+    Games
+</a>
+<a href="{% url 'news:list' %}"
+   class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition hover:bg-surface hover:text-text-primary {% if request.resolver_match.app_name == 'news' %}bg-surface-elevated font-bold text-text-primary{% else %}text-text-secondary{% endif %}">
+    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+    </svg>
+    News
+</a>
+{% if user.is_authenticated %}
+<a href="{% url 'messaging:inbox' %}"
+   class="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-sm transition hover:bg-surface hover:text-text-primary {% if request.resolver_match.app_name == 'messaging' %}bg-surface-elevated font-bold text-text-primary{% else %}text-text-secondary{% endif %}"
+   hx-get="{% url 'messaging:unread-count' %}" hx-trigger="load, every 30s" hx-target="#{{ prefix }}-message-unread" hx-swap="innerHTML">
+    <span class="flex items-center gap-3">
+        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+        </svg>
+        Messages
+    </span>
+    <span id="{{ prefix }}-message-unread">{% include "messaging/_unread_count.html" %}</span>
+</a>
+<a href="{% url 'notifications:list' %}"
+   class="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-sm transition hover:bg-surface hover:text-text-primary {% if request.resolver_match.app_name == 'notifications' %}bg-surface-elevated font-bold text-text-primary{% else %}text-text-secondary{% endif %}"
+   hx-get="{% url 'notifications:unread-count' %}" hx-trigger="load, every 30s" hx-target="#{{ prefix }}-notification-unread" hx-swap="innerHTML">
+    <span class="flex items-center gap-3">
+        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+        </svg>
+        Notifications
+    </span>
+    <span id="{{ prefix }}-notification-unread">{% include "notifications/_unread_count.html" %}</span>
+</a>
+<a href="{% url 'accounts:profile' user.username %}"
+   class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition hover:bg-surface hover:text-text-primary {% if request.resolver_match.app_name == 'accounts' %}bg-surface-elevated font-bold text-text-primary{% else %}text-text-secondary{% endif %}">
+    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+    </svg>
+    Profile
+</a>
+{% endif %}

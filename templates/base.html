@@ -4,49 +4,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}eKuraa{% endblock %}</title>
+    <title>{% block title %}GameKiro{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
     <script src="https://unpkg.com/htmx.org@2.0.10/dist/htmx.min.js"
             integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
             crossorigin="anonymous" defer></script>
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-    <header class="border-b border-slate-200 bg-white">
-        <nav class="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <a href="{% url 'core:home' %}" class="text-lg font-semibold">eKuraa</a>
-            <div class="flex flex-wrap items-center gap-3 text-sm sm:gap-4">
-                <a href="{% url 'forum:category_list' %}" class="hover:underline">Forum</a>
-                <a href="{% url 'games:list' %}" class="hover:underline">Games</a>
+<body class="min-h-screen flex flex-col bg-bg-base text-text-primary font-sans antialiased">
+    <header class="sticky top-0 z-40 border-b border-border-subtle bg-bg-base/95 backdrop-blur">
+        <nav class="flex items-center gap-2 px-3 py-3 sm:gap-4 sm:px-6">
+            <a href="{% url 'core:home' %}" class="shrink-0">
+                <img src="{% static 'img/logo.png' %}" alt="GameKiro" class="h-5 w-auto sm:h-6">
+            </a>
+
+            <form action="{% url 'forum:search' %}" method="get" class="hidden max-w-md flex-1 sm:block">
+                <label for="nav-search" class="sr-only">Search threads</label>
+                <div class="relative">
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                    <input type="search" id="nav-search" name="q" placeholder="Search threads&hellip;" value="{{ request.GET.q|default:'' }}"
+                           class="w-full rounded-lg border border-border-subtle bg-surface py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                </div>
+            </form>
+
+            <a href="{% url 'forum:search' %}" aria-label="Search"
+               class="ml-auto rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end sm:hidden">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+            </a>
+
+            <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'accounts:profile' user.username %}" class="hover:underline">{{ user.username }}</a>
-                    <a href="{% url 'messaging:inbox' %}" class="hover:underline" hx-get="{% url 'messaging:unread-count' %}" hx-trigger="load, every 30s" hx-target="#message-unread-count" hx-swap="innerHTML">
-                        Messages <span id="message-unread-count">{% include "messaging/_unread_count.html" %}</span>
+                    <a href="{% url 'notifications:list' %}" aria-label="Notifications"
+                       data-modal-trigger="notifications-modal"
+                       hx-get="{% url 'notifications:list' %}" hx-target="#notifications-modal-content" hx-swap="innerHTML"
+                       class="relative rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                        <span id="notification-unread-count" class="absolute -top-1 -right-1"
+                              hx-get="{% url 'notifications:unread-count' %}" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                            {% include "notifications/_unread_count.html" %}
+                        </span>
                     </a>
-                    <a href="{% url 'notifications:list' %}" class="hover:underline" hx-get="{% url 'notifications:unread-count' %}" hx-trigger="load, every 30s" hx-target="#notification-unread-count" hx-swap="innerHTML">
-                        Notifications <span id="notification-unread-count">{% include "notifications/_unread_count.html" %}</span>
+
+                    <div class="hidden items-center gap-3 rounded-full bg-surface-elevated px-3 py-1.5 text-sm font-bold text-text-primary sm:flex"
+                         hx-get="{% url 'accounts:nav-stats' %}" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                        <span class="flex items-center gap-1">0</span>
+                        <span class="flex items-center gap-1">0</span>
+                    </div>
+
+                    <a href="{% url 'accounts:profile' user.username %}"
+                       class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold text-text-primary transition hover:ring-2 hover:ring-accent-end">
+                        {{ user.username|first|upper }}
                     </a>
-                    <form method="post" action="{% url 'logout' %}">
+                    <form method="post" action="{% url 'logout' %}" class="hidden sm:block">
                         {% csrf_token %}
-                        <button type="submit" class="rounded px-2 py-1 text-left hover:underline">Log out</button>
+                        <button type="submit" class="text-sm text-text-secondary hover:text-text-primary">Log out</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="hover:underline">Log in</a>
-                    <a href="{% url 'accounts:signup' %}" class="hover:underline">Sign up</a>
+                    <a href="{% url 'login' %}" class="text-sm text-text-secondary hover:text-text-primary">Log in</a>
+                    <a href="{% url 'accounts:signup' %}"
+                       class="rounded-lg bg-accent-start px-3 py-1.5 text-sm font-bold text-text-primary transition hover:brightness-110">
+                        Sign up
+                    </a>
                 {% endif %}
+                <button type="button" id="mobile-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu"
+                        class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end lg:hidden">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
             </div>
         </nav>
+        <div id="mobile-menu" hidden class="glass-panel border-t border-border-subtle px-3 py-3 lg:hidden">
+            <div class="flex flex-col gap-1">
+                {% include "components/sidebar_nav.html" with prefix="mobile" %}
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}" class="mt-1 sm:hidden">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full rounded-lg px-3 py-2 text-left text-sm text-text-secondary hover:bg-surface hover:text-text-primary">Log out</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
     </header>
 
-    <main class="mx-auto flex w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
-        {% if messages %}
-            <ul class="mb-6 space-y-2">
-                {% for message in messages %}
-                    <li class="rounded px-4 py-2 bg-slate-100 text-sm">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        {% block content %}{% endblock %}
-    </main>
+    <div id="notifications-modal" hidden class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-bg-base/80 backdrop-blur-sm p-4 pt-16 sm:pt-24">
+        <div class="glass-panel-elevated w-full max-w-md rounded-2xl border border-border-subtle/60 p-4">
+            <div class="mb-3 flex items-center justify-between">
+                <h2 class="text-lg font-bold text-text-primary">Notifications</h2>
+                <button type="button" id="notifications-modal-close" aria-label="Close"
+                        class="rounded-lg p-1 text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="notifications-modal-content" class="max-h-[70vh] overflow-y-auto">
+                <p class="py-10 text-center text-sm text-text-secondary">Loading&hellip;</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex w-full flex-1">
+        <aside class="sticky top-[63px] hidden h-[calc(100vh-63px)] w-52 shrink-0 self-start overflow-hidden border-r border-border-subtle px-4 py-4 lg:block">
+            <p class="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-text-secondary">Menu</p>
+            <nav class="flex flex-col gap-0.5">
+                {% include "components/sidebar_nav.html" with prefix="sidebar" %}
+            </nav>
+        </aside>
+
+        <main class="min-w-0 flex-1 px-4 pb-24 pt-8 sm:px-6 lg:pb-8">
+            <div class="mx-auto max-w-[1400px]">
+                {% if messages %}
+                    <ul class="mb-6 space-y-2">
+                        {% for message in messages %}
+                            <li class="glass-panel rounded-lg border border-border-subtle/60 px-4 py-2 text-sm text-text-primary">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -58,13 +145,61 @@
                 event.detail.headers['X-CSRFToken'] = token;
             });
         });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('mobile-menu-toggle');
+            const menu = document.getElementById('mobile-menu');
+            if (!toggle || !menu) return;
+            toggle.addEventListener('click', function () {
+                const isHidden = menu.hasAttribute('hidden');
+                if (isHidden) {
+                    menu.removeAttribute('hidden');
+                } else {
+                    menu.setAttribute('hidden', '');
+                }
+                toggle.setAttribute('aria-expanded', String(isHidden));
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('notifications-modal');
+            const closeBtn = document.getElementById('notifications-modal-close');
+            if (!modal) return;
+
+            function closeModal() {
+                modal.setAttribute('hidden', '');
+            }
+
+            document.querySelectorAll('[data-modal-trigger="notifications-modal"]').forEach(function (trigger) {
+                trigger.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    modal.removeAttribute('hidden');
+                });
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) closeModal();
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !modal.hasAttribute('hidden')) closeModal();
+            });
+        });
     </script>
 
-
-    <footer class="border-t border-slate-200 bg-white">
-        <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-slate-500">
-            &copy; {% now "Y" %} eKuraa
+    <footer class="border-t border-border-subtle bg-bg-base pb-16 lg:pb-0">
+        <div class="flex flex-col gap-3 px-4 py-6 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <p>&copy; {% now "Y" %} Cosmic Store LLC. GameKiro is a trademark of Cosmic Store LLC.</p>
+            <nav class="flex flex-wrap gap-x-4 gap-y-1" aria-label="Legal">
+                <a href="{% url 'core:privacy' %}" class="hover:text-text-primary">Privacy Policy</a>
+                <a href="{% url 'core:terms' %}" class="hover:text-text-primary">Terms of Service</a>
+                <a href="{% url 'core:cookies' %}" class="hover:text-text-primary">Cookie Policy</a>
+                <a href="mailto:contact@gamekiro.com" class="hover:text-text-primary">Contact</a>
+            </nav>
         </div>
     </footer>
+
+    {% include "components/bottom_nav.html" %}
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

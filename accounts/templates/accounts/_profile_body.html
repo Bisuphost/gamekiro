@@ -1,0 +1,135 @@
+{% load reputation_tags %}
+{% load gamification_tags %}
+
+<div class="max-w-3xl mx-auto">
+    <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+        {% if profile_user.profile.avatar %}
+        <img src="{{ profile_user.profile.avatar.url }}" alt="{{ profile_user.username }}"
+             class="h-28 w-28 rounded-full object-cover shrink-0 sm:h-36 sm:w-36">
+        {% else %}
+        <div class="h-28 w-28 rounded-full bg-surface-elevated shrink-0 flex items-center justify-center text-text-primary text-4xl font-semibold sm:h-36 sm:w-36">
+            {{ profile_user.username|first|upper }}
+        </div>
+        {% endif %}
+        <div class="min-w-0 flex-1 text-center sm:text-left">
+            <h1 class="text-2xl font-bold text-text-primary">{{ profile_user.username }}</h1>
+            {% if profile_user.profile.bio %}
+            <p class="mt-1 text-text-secondary">{{ profile_user.profile.bio }}</p>
+            {% endif %}
+
+            <div class="mt-4 flex justify-center sm:justify-start">
+                {% include "accounts/profile_stats.html" %}
+            </div>
+
+            <div class="mt-4 flex justify-center gap-2 sm:justify-start">
+                {% if request.user == profile_user %}
+                <a href="{% url 'accounts:profile-edit' %}"
+                   class="rounded-lg border border-border-subtle py-1.5 px-4 text-sm font-semibold text-text-primary hover:bg-surface transition">
+                    Edit profile
+                </a>
+                {% elif request.user.is_authenticated %}
+                <form method="post" action="{% url 'social:toggle-follow' profile_user.username %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="rounded-lg py-1.5 px-4 text-sm font-bold transition
+                                   {% if is_following %}border border-border-subtle text-text-secondary hover:bg-surface hover:text-text-primary{% else %}bg-accent-start text-text-primary hover:brightness-110{% endif %}">
+                        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                    </button>
+                </form>
+                <a href="{% url 'messaging:conversation' profile_user.username %}"
+                   class="rounded-lg border border-border-subtle py-1.5 px-4 text-sm font-medium text-text-secondary hover:bg-surface hover:text-text-primary transition">
+                    Message
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                {% karma_badge profile_user %}
+                {% achievement_badges profile_user %}
+            </div>
+        </div>
+    </div>
+
+    {% if profile_user.profile.discord_username or profile_user.profile.steam_id or profile_user.profile.psn_id or profile_user.profile.website or profile_user.profile.other_links %}
+    <dl class="glass-panel grid grid-cols-2 gap-4 text-sm rounded-lg border border-border-subtle/60 p-4 mt-6">
+        {% if profile_user.profile.discord_username %}
+        <div>
+            <dt class="text-text-secondary">Discord</dt>
+            <dd class="text-text-primary">{{ profile_user.profile.discord_username }}</dd>
+        </div>
+        {% endif %}
+        {% if profile_user.profile.steam_id %}
+        <div>
+            <dt class="text-text-secondary">Steam</dt>
+            <dd class="text-text-primary">{{ profile_user.profile.steam_id }}</dd>
+        </div>
+        {% endif %}
+        {% if profile_user.profile.psn_id %}
+        <div>
+            <dt class="text-text-secondary">PSN</dt>
+            <dd class="text-text-primary">{{ profile_user.profile.psn_id }}</dd>
+        </div>
+        {% endif %}
+        {% if profile_user.profile.website %}
+        <div>
+            <dt class="text-text-secondary">Website</dt>
+            <dd><a href="{{ profile_user.profile.website }}" class="text-text-primary underline underline-offset-2">{{ profile_user.profile.website }}</a></dd>
+        </div>
+        {% endif %}
+        {% if profile_user.profile.other_links %}
+        <div>
+            <dt class="text-text-secondary">Other link</dt>
+            <dd><a href="{{ profile_user.profile.other_links }}" class="text-text-primary underline underline-offset-2">{{ profile_user.profile.other_links }}</a></dd>
+        </div>
+        {% endif %}
+    </dl>
+    {% endif %}
+
+    {% include "accounts/profile_games.html" %}
+</div>
+
+<div id="profile-list-modal" hidden class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-bg-base/80 backdrop-blur-sm p-4 pt-16 sm:pt-24">
+    <div class="glass-panel-elevated w-full max-w-md rounded-2xl border border-border-subtle/60 p-4">
+        <div class="mb-3 flex items-center justify-between">
+            <h2 id="profile-list-modal-title" class="text-lg font-bold text-text-primary"></h2>
+            <button type="button" id="profile-list-modal-close" aria-label="Close"
+                    class="rounded-lg p-1 text-text-secondary hover:bg-surface hover:text-text-primary">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="profile-list-modal-content" class="max-h-[60vh] overflow-y-auto">
+            <p class="py-10 text-center text-sm text-text-secondary">Loading&hellip;</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('profile-list-modal');
+        const title = document.getElementById('profile-list-modal-title');
+        const closeBtn = document.getElementById('profile-list-modal-close');
+        if (!modal) return;
+
+        function closeModal() {
+            modal.setAttribute('hidden', '');
+        }
+
+        document.querySelectorAll('[data-profile-list-trigger]').forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                title.textContent = link.dataset.profileListTrigger;
+                modal.removeAttribute('hidden');
+            });
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !modal.hasAttribute('hidden')) closeModal();
+        });
+    });
+</script>

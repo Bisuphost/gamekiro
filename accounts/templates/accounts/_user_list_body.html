@@ -1,0 +1,16 @@
+<div class="divide-y divide-border-subtle">
+    {% for user in users %}
+    <a href="{% url 'accounts:profile-detail' user.username %}" class="flex items-center gap-3 p-3 transition hover:bg-surface-elevated/60">
+        {% if user.profile.avatar %}
+        <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="h-9 w-9 rounded-full object-cover shrink-0">
+        {% else %}
+        <div class="h-9 w-9 rounded-full bg-surface-elevated shrink-0 flex items-center justify-center text-text-primary text-sm font-semibold">
+            {{ user.username|first|upper }}
+        </div>
+        {% endif %}
+        <span class="font-medium text-text-primary">{{ user.username }}</span>
+    </a>
+    {% empty %}
+    <div class="py-10 text-center text-text-secondary">No users yet.</div>
+    {% endfor %}
+</div>

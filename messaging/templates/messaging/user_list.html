@@ -1,34 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}New message — eKuraa{% endblock %}
+{% block title %}New message{% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-3xl">
     <div class="mb-6 flex items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold">Start a conversation</h1>
-            <p class="mt-1 text-sm text-slate-600">Find a player to message.</p>
+            <h1 class="text-2xl font-bold text-text-primary">Start a conversation</h1>
+            <p class="mt-1 text-sm text-text-secondary">Find a player to message.</p>
         </div>
-        <a href="{% url 'messaging:inbox' %}" class="shrink-0 text-sm text-slate-600 hover:underline">Back to inbox</a>
+        <a href="{% url 'messaging:inbox' %}" class="shrink-0 text-sm text-text-secondary hover:text-text-primary hover:underline">Back to inbox</a>
     </div>
 
     <form method="get" class="mb-6 flex gap-2">
         <label for="user-search" class="sr-only">Search users</label>
-        <input id="user-search" name="q" value="{{ query }}" type="search" placeholder="Search by username or name" class="min-w-0 flex-1 rounded border border-slate-300 bg-white px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500">
-        <button type="submit" class="rounded bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Search</button>
+        <input id="user-search" name="q" value="{{ query }}" type="search" placeholder="Search by username or name" class="min-w-0 flex-1 rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end">
+        <button type="submit" class="rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">Search</button>
     </form>
 
-    <div class="divide-y divide-slate-200 rounded border border-slate-200 bg-white">
+    <div class="glass-panel divide-y divide-border-subtle overflow-hidden rounded-xl border border-border-subtle/60">
         {% for other_user in users %}
-            <a href="{% url 'messaging:conversation' other_user.username %}" class="flex items-center justify-between px-4 py-4 hover:bg-slate-50">
+            <a href="{% url 'messaging:conversation' other_user.username %}" class="flex items-center justify-between px-4 py-4 transition hover:bg-surface-elevated/60">
                 <div class="min-w-0">
-                    <h2 class="font-semibold">{{ other_user.username }}</h2>
-                    {% if other_user.get_full_name %}<p class="text-sm text-slate-600">{{ other_user.get_full_name }}</p>{% endif %}
+                    <h2 class="font-bold text-text-primary">{{ other_user.username }}</h2>
+                    {% if other_user.get_full_name %}<p class="text-sm text-text-secondary">{{ other_user.get_full_name }}</p>{% endif %}
                 </div>
-                <span class="ml-4 shrink-0 text-sm font-medium text-sky-700">Message</span>
+                <span class="ml-4 shrink-0 text-sm font-medium text-accent-end">Message</span>
             </a>
         {% empty %}
-            <p class="px-4 py-8 text-center text-slate-600">No users found.</p>
+            <p class="px-4 py-8 text-center text-text-secondary">No users found.</p>
         {% endfor %}
     </div>
 </div>

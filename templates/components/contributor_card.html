@@ -1,0 +1,15 @@
+<a href="{% url 'accounts:profile' contributor.user.username %}"
+   class="glass-panel flex items-center gap-3 rounded-xl border border-border-subtle/60 p-3 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+    {% if contributor.user.profile.avatar %}
+    <img src="{{ contributor.user.profile.avatar.url }}" alt="{{ contributor.user.username }}"
+         class="h-9 w-9 shrink-0 rounded-full object-cover">
+    {% else %}
+    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold text-text-primary">
+        {{ contributor.user.username|first|upper }}
+    </div>
+    {% endif %}
+    <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-bold text-text-primary">{{ contributor.user.username }}</p>
+        <p class="truncate text-xs text-text-secondary">{{ contributor.score }} karma</p>
+    </div>
+</a>

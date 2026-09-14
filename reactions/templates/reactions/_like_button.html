@@ -7,13 +7,13 @@
           hx-swap="outerHTML">
         {% csrf_token %}
         <button type="submit"
-            class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition {% if liked %}bg-slate-900 text-white hover:bg-slate-700{% else %}border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50{% endif %}">
+            class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition {% if liked %}bg-accent-start text-text-primary hover:brightness-110{% else %}border border-border-subtle text-text-secondary hover:border-accent-end/40 hover:text-text-primary{% endif %}">
             <span>{% if liked %}{{ active_label|default:'Liked' }}{% else %}{{ label|default:'Like' }}{% endif %}</span>
             <span class="tabular-nums">{{ count }}</span>
         </button>
     </form>
     {% else %}
-    <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-400">
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-border-subtle px-3 py-1 text-xs font-medium text-text-secondary">
         <span>{{ label|default:'Like' }}</span>
         <span class="tabular-nums">{{ count }}</span>
     </span>

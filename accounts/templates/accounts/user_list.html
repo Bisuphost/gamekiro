@@ -1,10 +1,18 @@
-<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8"><title>{{ list_type }} | Gamekiro</title></head>
-<body>
-<main><h1>{{ list_type }} for {{ profile_user.username }}</h1>
-<ul>{% for user in users %}<li><a href="{% url 'accounts:profile-detail' user.username %}">{{ user.username }}</a></li>{% empty %}<li>No users yet.</li>{% endfor %}</ul>
-<a href="{% url 'accounts:profile-detail' profile_user.username %}">Back to profile</a>
-</main>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}{{ list_type }} — {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="text-sm text-text-secondary mb-4">
+        <a href="{% url 'accounts:profile-detail' profile_user.username %}" class="hover:text-text-primary hover:underline">{{ profile_user.username }}</a>
+        <span class="mx-1">/</span>
+        {{ list_type }}
+    </div>
+    <h1 class="text-2xl font-bold text-text-primary mb-6">{{ list_type }} for {{ profile_user.username }}</h1>
+
+    <div class="glass-panel rounded-xl border border-border-subtle/60 overflow-hidden">
+        {% include "accounts/_user_list_body.html" %}
+    </div>
+</div>
+{% endblock %}

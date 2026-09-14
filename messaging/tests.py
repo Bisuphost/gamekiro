@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .models import ConversationArchive, Message
+from .services import RATE_LIMIT_MAX
 
 
 class MessagingTests(TestCase):
@@ -118,6 +119,18 @@ class MessagingTests(TestCase):
         self.assertTrue(
             ConversationArchive.objects.filter(user=self.sender, partner=self.recipient).exists()
         )
+
+    def test_sending_too_many_messages_is_rate_limited(self):
+        self.client.login(username="sender", password="password123")
+        url = reverse("messaging:send", args=["recipient"])
+
+        for i in range(RATE_LIMIT_MAX):
+            self.client.post(url, {"body": f"Message {i}"})
+        self.assertEqual(Message.objects.count(), RATE_LIMIT_MAX)
+
+        response = self.client.post(url, {"body": "One too many"})
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(Message.objects.count(), RATE_LIMIT_MAX)
 
     def test_new_message_after_archive_is_visible_and_unread(self):
         Message.objects.create(sender=self.sender, recipient=self.recipient, body="Old")

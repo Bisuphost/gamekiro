@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from .models import Report
 
-REPORTABLE_MODELS = {"forum": {"post"}}
+REPORTABLE_MODELS = {"forum": {"post"}, "games": {"review"}}
 
 
 def hidden_object_ids(model_class):

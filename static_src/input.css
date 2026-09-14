@@ -11,3 +11,56 @@
 @source "../reputation/templates";
 @source "../gamification/templates";
 @source "../games/templates";
+@source "../news/templates";
+
+@theme {
+  --color-bg-base: #0A0A0F;
+  --color-surface: #17171F;
+  --color-surface-elevated: #1C1C26;
+  --color-border-subtle: #2A2A35;
+
+  --color-accent-start: #6D28D9;
+  --color-accent-end: #A855F7;
+
+  --color-text-primary: #F2F2F5;
+  --color-text-secondary: #9A9AA5;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+.glass-panel {
+  background-color: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-panel-elevated {
+  background-color: color-mix(in srgb, var(--color-surface-elevated) 60%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-accent {
+  background-color: color-mix(in srgb, var(--color-accent-start) 78%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-accent:hover {
+  background-color: color-mix(in srgb, var(--color-accent-start) 92%, transparent);
+}

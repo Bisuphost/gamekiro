@@ -1,0 +1,19 @@
+{% if query %}
+{% for game in games %}
+<button type="button"
+        class="game-search-result flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-surface-elevated"
+        data-game-id="{{ game.pk }}"
+        data-game-title="{{ game.title }}">
+    {% if game.cover_image %}
+    <img src="{{ game.cover_image.url }}" alt="" class="h-8 w-8 shrink-0 rounded object-cover">
+    {% else %}
+    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-surface-elevated text-xs font-bold text-text-primary">
+        {{ game.title|first|upper }}
+    </span>
+    {% endif %}
+    <span class="truncate text-text-primary">{{ game.title }}</span>
+</button>
+{% empty %}
+<p class="px-3 py-2 text-sm text-text-secondary">No games found for &ldquo;{{ query }}&rdquo;.</p>
+{% endfor %}
+{% endif %}

@@ -1,0 +1,42 @@
+<div id="notification-{{ notification.pk }}" class="flex items-start gap-3 p-4 {% if not notification.is_read %}bg-surface-elevated/60{% endif %}">
+    {% if not notification.is_read %}
+    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent-end"></span>
+    {% else %}
+    <span class="mt-1.5 h-2 w-2 shrink-0"></span>
+    {% endif %}
+    <div class="min-w-0 flex-1">
+        {% if notification.verb == "new_follower" %}
+        <a href="{% url 'accounts:profile-detail' notification.actor.username %}" class="text-text-primary hover:underline">
+            {{ notification.actor.username }} started following you
+        </a>
+        {% elif notification.verb == "thread_reply" %}
+        <a href="{% url 'forum:thread_detail' notification.target.thread.category.slug notification.target.thread.slug %}" class="text-text-primary hover:underline">
+            {{ notification.actor.username }} replied to "{{ notification.target.thread.title }}"
+        </a>
+        {% elif notification.verb == "dm_received" %}
+        <a href="{% url 'messaging:conversation' notification.actor.username %}" class="text-text-primary hover:underline">
+            {{ notification.actor.username }} sent you a message
+        </a>
+        {% elif notification.verb == "reaction_received" and notification.content_type.model == "thread" %}
+        <a href="{% url 'forum:thread_detail' notification.target.category.slug notification.target.slug %}" class="text-text-primary hover:underline">
+            {{ notification.actor.username }} liked your thread "{{ notification.target.title }}"
+        </a>
+        {% elif notification.verb == "reaction_received" %}
+        <a href="{% url 'forum:thread_detail' notification.target.thread.category.slug notification.target.thread.slug %}" class="text-text-primary hover:underline">
+            {{ notification.actor.username }} liked your reply
+        </a>
+        {% elif notification.verb == "badge_earned" %}
+        <span class="text-text-primary">You earned the "{{ notification.target.name }}" badge</span>
+        {% endif %}
+        <p class="mt-1 text-sm text-text-secondary">{{ notification.created_at|date:"M j, Y, g:i a" }}</p>
+    </div>
+    {% if not notification.is_read %}
+    <form method="post" action="{% url 'notifications:mark-read' notification.pk %}" class="shrink-0"
+          hx-post="{% url 'notifications:mark-read' notification.pk %}"
+          hx-target="#notification-{{ notification.pk }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="page" value="{{ page_number }}">
+        <button type="submit" class="text-sm text-text-secondary underline underline-offset-2 hover:text-text-primary">Mark read</button>
+    </form>
+    {% endif %}
+</div>

@@ -5,6 +5,7 @@ from . import views
 app_name = "accounts"
 
 urlpatterns = [
+    path("nav-stats/", views.nav_stats, name="nav-stats"),
     path("edit/", views.profile_edit, name="profile-edit"),
     path("setup/", views.profile_setup, name="profile-setup"),
     path("u/games/add/", views.profile_game_add, name="profile-game-add"),

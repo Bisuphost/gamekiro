@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<article class="mx-auto max-w-3xl">
+    <div class="mb-4 text-sm text-text-secondary">
+        <a href="{% url 'news:list' %}" class="hover:text-text-primary">News</a>
+        <span class="mx-1">/</span>
+        {{ article.title }}
+    </div>
+
+    {% if not article.is_visible %}
+    <div class="mb-4 rounded-lg border border-accent-end/40 bg-surface px-4 py-2 text-sm text-accent-end">
+        This article isn&rsquo;t published yet &mdash; only staff can preview it.
+    </div>
+    {% endif %}
+
+    {% if article.cover_image %}
+    <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" class="mb-6 max-h-96 w-full rounded-xl object-cover">
+    {% endif %}
+
+    <h1 class="text-3xl font-bold text-text-primary">{{ article.title }}</h1>
+    <p class="mt-2 text-sm text-text-secondary">
+        {% if article.author %}By {{ article.author.username }} &middot; {% endif %}{{ article.published_at|date:"F j, Y" }}
+    </p>
+
+    <div class="mt-6 whitespace-pre-line leading-7 text-text-primary">{{ article.body }}</div>
+</article>
+{% endblock %}

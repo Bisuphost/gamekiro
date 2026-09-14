@@ -3,15 +3,15 @@
 {% block title %}Forum{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Forum</h1>
+<h1 class="mb-6 text-2xl font-bold text-text-primary">Forum</h1>
 
 <div class="space-y-3">
     {% for category in categories %}
     <a href="{% url 'forum:category_detail' category.slug %}"
-       class="block rounded-lg border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-sm transition">
-        <h2 class="text-lg font-semibold text-slate-900">{{ category.name }}</h2>
+       class="glass-panel block rounded-xl border border-border-subtle/60 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+        <h2 class="text-lg font-bold text-text-primary">{{ category.name }}</h2>
         {% if category.description %}
-        <p class="text-sm text-slate-600 mt-1">{{ category.description }}</p>
+        <p class="mt-1 text-sm text-text-secondary">{{ category.description }}</p>
         {% endif %}
     </a>
     {% empty %}

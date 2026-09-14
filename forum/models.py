@@ -3,6 +3,8 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models
 
+from core.validators import validate_image_file_size
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -63,3 +65,17 @@ class Post(models.Model):
 
     def __str__(self):
         return f"{self.author} on {self.thread}"
+
+
+class PostImage(models.Model):
+    uploader = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="forum_post_images"
+    )
+    image = models.ImageField(upload_to="post_images/", validators=[validate_image_file_size])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"image uploaded by {self.uploader}"
