@@ -12,9 +12,79 @@
     <script src="https://unpkg.com/htmx.org@2.0.10/dist/htmx.min.js"
             integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
             crossorigin="anonymous" defer></script>
+    <style>
+        #page-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(to right, #6D28D9, #A855F7);
+            z-index: 100;
+            opacity: 0;
+            transition: width 300ms ease, opacity 200ms ease;
+        }
+        #page-loading-bar.is-loading {
+            opacity: 1;
+        }
+        #page-loading-bar.is-done {
+            width: 100% !important;
+            opacity: 0;
+            transition: width 200ms ease, opacity 400ms ease 150ms;
+        }
+        .collapsible-panel {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            transition: grid-template-rows 280ms ease, opacity 200ms ease;
+        }
+        .collapsible-panel.is-open {
+            grid-template-rows: 1fr;
+            opacity: 1;
+        }
+        .collapsible-panel > div {
+            overflow: hidden;
+        }
+        #mobile-menu-toggle .icon-open,
+        #mobile-menu-toggle .icon-close {
+            transition: opacity 150ms ease, transform 150ms ease;
+        }
+        #mobile-menu-toggle .icon-close {
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            opacity: 0;
+            transform: rotate(-45deg);
+        }
+        #mobile-menu-toggle[aria-expanded="true"] .icon-open {
+            opacity: 0;
+            transform: rotate(45deg);
+        }
+        #mobile-menu-toggle[aria-expanded="true"] .icon-close {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+        .mobile-drawer {
+            transform: translateX(-100%);
+            transition: transform 300ms ease;
+        }
+        .mobile-drawer.is-open {
+            transform: translateX(0);
+        }
+        .mobile-drawer-backdrop {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 300ms ease;
+        }
+        .mobile-drawer-backdrop.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen flex flex-col bg-bg-base text-text-primary font-sans antialiased">
+    <div id="page-loading-bar"></div>
     <header class="sticky top-0 z-40 border-b border-border-subtle bg-bg-base/95 backdrop-blur">
         <nav class="flex items-center gap-2 px-3 py-3 sm:gap-4 sm:px-6">
             <a href="{% url 'core:home' %}" class="shrink-0">
@@ -32,12 +102,12 @@
                 </div>
             </form>
 
-            <a href="{% url 'forum:search' %}" aria-label="Search"
-               class="ml-auto rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end sm:hidden">
+            <button type="button" id="mobile-search-toggle" aria-label="Search" aria-expanded="false" aria-controls="mobile-search-bar"
+                    class="ml-auto rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end sm:hidden">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
-            </a>
+            </button>
 
             <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
                 {% if user.is_authenticated %}
@@ -76,14 +146,35 @@
                     </a>
                 {% endif %}
                 <button type="button" id="mobile-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu"
-                        class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end lg:hidden">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        class="relative rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end lg:hidden">
+                    <svg class="icon-open h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                    <svg class="icon-close h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </nav>
-        <div id="mobile-menu" hidden class="glass-panel border-t border-border-subtle px-3 py-3 lg:hidden">
+        <div id="mobile-search-bar" class="collapsible-panel sm:hidden" aria-hidden="true">
+            <div>
+                <form action="{% url 'forum:search' %}" method="get" class="px-3 pb-3">
+                    <label for="mobile-nav-search" class="sr-only">Search threads</label>
+                    <div class="relative">
+                        <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                        <input type="search" id="mobile-nav-search" name="q" placeholder="Search threads&hellip;" value="{{ request.GET.q|default:'' }}"
+                               class="w-full rounded-lg border border-border-subtle bg-surface py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <div id="mobile-menu-backdrop" class="mobile-drawer-backdrop fixed inset-x-0 bottom-0 top-[63px] z-30 bg-black/60 lg:hidden"></div>
+    <div id="mobile-menu" class="mobile-drawer fixed inset-y-0 top-[63px] left-0 z-40 w-72 max-w-[80vw] overflow-y-auto border-r border-border-subtle bg-bg-base lg:hidden" aria-hidden="true">
+        <div class="px-3 py-3">
             <div class="flex flex-col gap-1">
                 {% include "components/sidebar_nav.html" with prefix="mobile" %}
                 {% if user.is_authenticated %}
@@ -94,7 +185,7 @@
                 {% endif %}
             </div>
         </div>
-    </header>
+    </div>
 
     <div id="notifications-modal" hidden class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-bg-base/80 backdrop-blur-sm p-4 pt-16 sm:pt-24">
         <div class="glass-panel-elevated w-full max-w-md rounded-2xl border border-border-subtle/60 p-4">
@@ -146,19 +237,85 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.getElementById('mobile-menu-toggle');
-            const menu = document.getElementById('mobile-menu');
-            if (!toggle || !menu) return;
+        function closeCollapsiblePanel(toggle, panel) {
+            if (!toggle || !panel) return;
+            panel.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            panel.setAttribute('aria-hidden', 'true');
+        }
+
+        function setupCollapsiblePanel(toggle, panel, options) {
+            if (!toggle || !panel) return;
+            var onOpen = options && options.onOpen;
+            var closeOthers = (options && options.closeOthers) || [];
             toggle.addEventListener('click', function () {
-                const isHidden = menu.hasAttribute('hidden');
-                if (isHidden) {
-                    menu.removeAttribute('hidden');
-                } else {
-                    menu.setAttribute('hidden', '');
+                var isOpen = panel.classList.toggle('is-open');
+                toggle.setAttribute('aria-expanded', String(isOpen));
+                panel.setAttribute('aria-hidden', String(!isOpen));
+                if (isOpen) {
+                    closeOthers.forEach(function (other) {
+                        if (other.close) other.close();
+                        else closeCollapsiblePanel(other.toggle, other.panel);
+                    });
+                    if (onOpen) onOpen();
                 }
-                toggle.setAttribute('aria-expanded', String(isHidden));
             });
+        }
+
+        function setupDrawer(toggle, drawer, backdrop) {
+            if (!toggle || !drawer || !backdrop) return null;
+
+            function open() {
+                drawer.classList.add('is-open');
+                backdrop.classList.add('is-open');
+                toggle.setAttribute('aria-expanded', 'true');
+                drawer.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function close() {
+                drawer.classList.remove('is-open');
+                backdrop.classList.remove('is-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                drawer.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            toggle.addEventListener('click', function () {
+                if (drawer.classList.contains('is-open')) close(); else open();
+            });
+            backdrop.addEventListener('click', close);
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && drawer.classList.contains('is-open')) close();
+            });
+
+            return { open: open, close: close };
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var menuToggle = document.getElementById('mobile-menu-toggle');
+            var menuPanel = document.getElementById('mobile-menu');
+            var menuBackdrop = document.getElementById('mobile-menu-backdrop');
+            var searchToggle = document.getElementById('mobile-search-toggle');
+            var searchPanel = document.getElementById('mobile-search-bar');
+
+            var menuDrawer = setupDrawer(menuToggle, menuPanel, menuBackdrop);
+
+            setupCollapsiblePanel(searchToggle, searchPanel, {
+                closeOthers: menuDrawer ? [{ close: menuDrawer.close }] : [],
+                onOpen: function () {
+                    var input = document.getElementById('mobile-nav-search');
+                    if (input) setTimeout(function () { input.focus(); }, 150);
+                },
+            });
+
+            if (menuDrawer && searchToggle && searchPanel) {
+                menuToggle.addEventListener('click', function () {
+                    if (menuPanel.classList.contains('is-open')) {
+                        closeCollapsiblePanel(searchToggle, searchPanel);
+                    }
+                });
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -185,6 +342,45 @@
                 if (event.key === 'Escape' && !modal.hasAttribute('hidden')) closeModal();
             });
         });
+
+        (function () {
+            var bar = document.getElementById('page-loading-bar');
+            if (!bar) return;
+            var hideTimer = null;
+
+            function start() {
+                clearTimeout(hideTimer);
+                bar.classList.remove('is-done');
+                bar.style.width = '0%';
+                bar.classList.add('is-loading');
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        bar.style.width = '75%';
+                    });
+                });
+            }
+
+            function done() {
+                bar.classList.add('is-done');
+                hideTimer = setTimeout(function () {
+                    bar.classList.remove('is-loading', 'is-done');
+                    bar.style.width = '0%';
+                }, 500);
+            }
+
+            window.addEventListener('beforeunload', start);
+
+            document.body.addEventListener('htmx:beforeRequest', function (event) {
+                var trigger = event.target.getAttribute('hx-trigger') || '';
+                if (trigger.indexOf('every') !== -1) return;
+                start();
+            });
+            document.body.addEventListener('htmx:afterRequest', function (event) {
+                var trigger = event.target.getAttribute('hx-trigger') || '';
+                if (trigger.indexOf('every') !== -1) return;
+                done();
+            });
+        })();
     </script>
 
     <footer class="border-t border-border-subtle bg-bg-base pb-16 lg:pb-0">
