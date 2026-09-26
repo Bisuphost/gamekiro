@@ -7,25 +7,62 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0004_profile_created_at_profile_updated_at_and_more'),
-        ('games', '0002_review'),
+        ("accounts", "0004_profile_created_at_profile_updated_at_and_more"),
+        ("games", "0002_review"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProfileGame',
+            name="ProfileGame",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('playing', 'Playing'), ('completed', 'Completed'), ('wishlist', 'Wishlist'), ('dropped', 'Dropped')], default='playing', max_length=10)),
-                ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='profile_games', to='games.game')),
-                ('profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='profile_games', to='accounts.profile')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("playing", "Playing"),
+                            ("completed", "Completed"),
+                            ("wishlist", "Wishlist"),
+                            ("dropped", "Dropped"),
+                        ],
+                        default="playing",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "game",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="profile_games",
+                        to="games.game",
+                    ),
+                ),
+                (
+                    "profile",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="profile_games",
+                        to="accounts.profile",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['status', 'game__title'],
-                'indexes': [models.Index(fields=['profile', 'status'], name='accounts_pr_profile_f6a904_idx')],
-                'constraints': [models.UniqueConstraint(fields=('profile', 'game'), name='unique_profile_game')],
+                "ordering": ["status", "game__title"],
+                "indexes": [
+                    models.Index(
+                        fields=["profile", "status"], name="accounts_pr_profile_f6a904_idx"
+                    )
+                ],
+                "constraints": [
+                    models.UniqueConstraint(fields=("profile", "game"), name="unique_profile_game")
+                ],
             },
         ),
     ]

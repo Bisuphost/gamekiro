@@ -16,6 +16,7 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[])
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@gamekiro.local")
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 SITE_URL = env("SITE_URL", default="http://localhost:8000")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 
 DJANGO_APPS = [
@@ -50,6 +51,7 @@ LOCAL_APPS = [
     "gamification",
     "games",
     "news",
+    "marketplace",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -101,6 +103,26 @@ DATABASES = {
     )
 }
 
+# select_for_update() is a SILENT no-op on SQLite (no exception — the whole clause is
+# skipped), and the marketplace's checkout transaction reads then writes in the same
+# atomic block. SQLite's default BEGIN DEFERRED only takes a lock on first write, so a
+# read-then-write can fail an immediate SQLITE_BUSY without honouring busy_timeout.
+# BEGIN IMMEDIATE takes the write lock up front instead. WAL lets readers proceed
+# during a writer. This only matters for dev/CI — production must run PostgreSQL
+# (see marketplace/checks.py).
+if DATABASES["default"]["ENGINE"].endswith("sqlite3"):
+    DATABASES["default"].setdefault("OPTIONS", {}).update(
+        {
+            "transaction_mode": "IMMEDIATE",
+            "init_command": (
+                "PRAGMA journal_mode=WAL;"
+                "PRAGMA synchronous=NORMAL;"
+                "PRAGMA busy_timeout=5000;"
+                "PRAGMA foreign_keys=ON;"
+            ),
+        }
+    )
+
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "core:home"
@@ -148,3 +170,40 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+
+# --- Marketplace ---------------------------------------------------------------
+MARKETPLACE_ENABLED = env.bool("MARKETPLACE_ENABLED", default=False)
+MARKETPLACE_CURRENCY = env("MARKETPLACE_CURRENCY", default="USD")
+MARKETPLACE_KEY_ENC_KEY = env("MARKETPLACE_KEY_ENC_KEY", default=None)
+MARKETPLACE_SUPPORT_EMAIL = env("MARKETPLACE_SUPPORT_EMAIL", default="support@gamekiro.local")
+MARKETPLACE_USE_CELERY = env.bool("MARKETPLACE_USE_CELERY", default=False)
+MARKETPLACE_RESERVATION_TTL_MINUTES = env.int("MARKETPLACE_RESERVATION_TTL_MINUTES", default=35)
+MARKETPLACE_ALLOW_SQLITE = env.bool("MARKETPLACE_ALLOW_SQLITE", default=False)
+MARKETPLACE_ALLOW_MOCK = False
+MARKETPLACE_MOCK_WEBHOOK_SECRET = env("MARKETPLACE_MOCK_WEBHOOK_SECRET", default=None)
+
+PAYMENT_PROVIDERS_ENABLED = env.list("PAYMENT_PROVIDERS_ENABLED", default=[])
+
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default=None)
+STRIPE_WEBHOOK_SECRETS = [s for s in env.list("STRIPE_WEBHOOK_SECRETS", default=[]) if s]
+STRIPE_API_VERSION = env("STRIPE_API_VERSION", default=None)
+
+PAYPAL_ENV = env("PAYPAL_ENV", default="sandbox")
+PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID", default=None)
+PAYPAL_CLIENT_SECRET = env("PAYPAL_CLIENT_SECRET", default=None)
+PAYPAL_WEBHOOK_ID = env("PAYPAL_WEBHOOK_ID", default=None)
+
+# --- Marketplace fraud & abuse controls ---------------------------------------
+# How many reverse proxies in front of this app append to X-Forwarded-For.
+# 0 (default) means: never trust X-Forwarded-For, use REMOTE_ADDR only — the
+# safe default, since a client can put anything in that header themselves.
+MARKETPLACE_TRUSTED_PROXY_COUNT = env.int("MARKETPLACE_TRUSTED_PROXY_COUNT", default=0)
+MARKETPLACE_REQUIRE_VERIFIED_EMAIL = env.bool("MARKETPLACE_REQUIRE_VERIFIED_EMAIL", default=True)
+MARKETPLACE_MAX_ORDERS_PER_DAY = env.int("MARKETPLACE_MAX_ORDERS_PER_DAY", default=20)
+MARKETPLACE_MAX_PAYMENT_FAILURES = env.int("MARKETPLACE_MAX_PAYMENT_FAILURES", default=5)
+MARKETPLACE_PAYMENT_FAILURE_COOLDOWN_MINUTES = env.int(
+    "MARKETPLACE_PAYMENT_FAILURE_COOLDOWN_MINUTES", default=30
+)
+MARKETPLACE_HIGH_VALUE_REVIEW_MINOR = env.int("MARKETPLACE_HIGH_VALUE_REVIEW_MINOR", default=20000)
+MARKETPLACE_FIRST_ORDER_REVIEW_MINOR = env.int("MARKETPLACE_FIRST_ORDER_REVIEW_MINOR", default=5000)
+MARKETPLACE_WEBHOOK_MAX_BODY_BYTES = env.int("MARKETPLACE_WEBHOOK_MAX_BODY_BYTES", default=262144)

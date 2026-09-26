@@ -1,0 +1,8 @@
+<form method="post" action="{% url 'marketplace:wishlist_toggle' %}"
+      hx-post="{% url 'marketplace:wishlist_toggle' %}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <input type="hidden" name="product_id" value="{{ product.pk }}">
+    <button type="submit" class="text-sm text-text-secondary hover:text-text-primary">
+        {% if in_wishlist %}Remove from wishlist{% else %}Add to wishlist{% endif %}
+    </button>
+</form>

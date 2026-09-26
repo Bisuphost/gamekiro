@@ -1,0 +1,21 @@
+<a href="{% url 'news:detail' article.slug %}"
+   class="group relative block overflow-hidden rounded-xl border border-border-subtle/60 {% if size == "lg" %}h-72 sm:h-96{% elif size == "md" %}h-56{% else %}h-48{% endif %}">
+    {% if article.cover_image %}
+    <img src="{{ article.cover_image.url }}" alt="{{ article.title }}"
+         class="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105">
+    {% else %}
+    <div class="absolute inset-0 bg-surface-elevated"></div>
+    {% endif %}
+    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+    <div class="relative flex h-full flex-col justify-end p-4 {% if size == "lg" %}sm:p-6{% endif %}">
+        <h3 class="{% if size == "lg" %}text-xl sm:text-2xl{% elif size == "md" %}text-lg{% else %}text-base{% endif %} font-bold leading-tight text-white">
+            {{ article.title }}
+        </h3>
+        {% if size == "lg" and article.summary %}
+        <p class="mt-2 hidden max-w-xl text-sm text-white/80 sm:block">{{ article.summary|truncatewords:24 }}</p>
+        {% endif %}
+        <p class="mt-2 text-xs text-white/70">
+            {% if article.author %}{{ article.author.username }} &middot; {% endif %}{{ article.published_at|date:"M j, Y" }}
+        </p>
+    </div>
+</a>

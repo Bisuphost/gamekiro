@@ -158,6 +158,39 @@ class BadgeEarnedNotificationTests(TestCase):
         self.assertEqual(Notification.objects.count(), 1)
 
 
+class OrderNotificationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="buyer", password="password123")
+        self.client.login(username="buyer", password="password123")
+
+    def _make_order(self):
+        from marketplace.models import Order
+
+        return Order.objects.create(user=self.user, currency="USD", total_minor=1999)
+
+    def test_order_fulfilled_notification_renders_a_message_not_blank(self):
+        order = self._make_order()
+        notify(
+            recipient=self.user, actor=None, verb=Notification.Verb.ORDER_FULFILLED, target=order
+        )
+
+        response = self.client.get(reverse("notifications:list"))
+
+        self.assertContains(response, "fulfilled")
+        self.assertContains(response, order.reference)
+
+    def test_order_needs_review_notification_renders_a_message_not_blank(self):
+        order = self._make_order()
+        notify(
+            recipient=self.user, actor=None, verb=Notification.Verb.ORDER_NEEDS_REVIEW, target=order
+        )
+
+        response = self.client.get(reverse("notifications:list"))
+
+        self.assertContains(response, "needs a closer look")
+        self.assertContains(response, order.reference)
+
+
 class NotificationListSecurityTests(TestCase):
     def setUp(self):
         self.user_a = User.objects.create_user(username="user_a", password="password123")

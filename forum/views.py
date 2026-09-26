@@ -33,6 +33,7 @@ def _search_filter(queryset, query):
         )
     return queryset.filter(title__icontains=query)
 
+
 THREADS_PER_PAGE = 20
 POSTS_PER_PAGE = 20
 

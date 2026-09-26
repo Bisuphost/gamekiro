@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Browse | GameKiro Store{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-3xl font-bold text-text-primary">Browse the Store</h1>
+        <p class="mt-2 text-text-secondary">Find a game key by platform, region, or title.</p>
+    </div>
+
+    <form method="get" class="glass-panel grid gap-4 rounded-xl border border-border-subtle/60 p-4 sm:grid-cols-4 sm:items-end">
+        <label class="text-sm font-medium text-text-secondary sm:col-span-2">Search
+            <input type="text" name="q" value="{{ query }}" placeholder="Search games&hellip;"
+                   class="mt-1 block w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 font-normal text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end">
+        </label>
+        <label class="text-sm font-medium text-text-secondary">Platform
+            <select name="platform" class="mt-1 block w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 font-normal text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                <option value="">All platforms</option>
+                {% for platform in platforms %}
+                <option value="{{ platform.slug }}"{% if selected_platform == platform.slug %} selected{% endif %}>{{ platform.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="text-sm font-medium text-text-secondary">Region
+            <select name="region" class="mt-1 block w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 font-normal text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                <option value="">All regions</option>
+                {% for region in regions %}
+                <option value="{{ region.code }}"{% if selected_region == region.code %} selected{% endif %}>{{ region.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="text-sm font-medium text-text-secondary">Sort
+            <select name="sort" class="mt-1 block w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 font-normal text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                <option value="newest"{% if selected_sort == "newest" %} selected{% endif %}>Newest</option>
+                <option value="price_low"{% if selected_sort == "price_low" %} selected{% endif %}>Price: low to high</option>
+                <option value="price_high"{% if selected_sort == "price_high" %} selected{% endif %}>Price: high to low</option>
+                <option value="title"{% if selected_sort == "title" %} selected{% endif %}>Title</option>
+            </select>
+        </label>
+        <div class="sm:col-span-4">
+            <button type="submit" class="glass-accent flex items-center justify-center gap-2 rounded-lg border border-accent-end/30 px-4 py-2 font-bold text-text-primary shadow-lg shadow-accent-start/20 transition duration-200 hover:-translate-y-0.5 hover:shadow-accent-start/40">
+                Apply filters
+            </button>
+        </div>
+    </form>
+
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {% for product in products %}
+            {% include "components/product_card.html" with product=product %}
+        {% empty %}
+            {% include "components/empty_state.html" with title="No matches" message="Try a different search or filter." %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

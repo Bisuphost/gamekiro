@@ -11,6 +11,8 @@ class Notification(models.Model):
         DM_RECEIVED = "dm_received"
         REACTION_RECEIVED = "reaction_received"
         BADGE_EARNED = "badge_earned"
+        ORDER_FULFILLED = "order_fulfilled"
+        ORDER_NEEDS_REVIEW = "order_needs_review"
 
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"

@@ -7,6 +7,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path("social/", include("social.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
+    path("store/", include("marketplace.urls")),
     path("", include("core.urls")),
     path("", include("messaging.urls")),
     path("", include("forum.urls")),

@@ -1,0 +1,11 @@
+<fieldset class="space-y-2">
+    <legend class="text-sm font-bold text-text-primary">Payment method</legend>
+    {% for provider in payment_providers %}
+    <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-border-subtle/60 p-3 text-sm text-text-primary transition hover:bg-surface-elevated/60">
+        <input type="radio" name="provider" value="{{ provider.slug }}" class="h-4 w-4" {% if forloop.first %}checked{% endif %} required>
+        <span class="font-bold">{{ provider.display_name }}</span>
+    </label>
+    {% empty %}
+    <p class="text-sm text-text-secondary">No payment method is available right now. Please check back soon.</p>
+    {% endfor %}
+</fieldset>

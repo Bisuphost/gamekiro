@@ -47,9 +47,7 @@ class Migration(migrations.Migration):
                 ("description", models.TextField(blank=True)),
                 (
                     "cover_image",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="game_covers/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="game_covers/"),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -64,9 +62,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "platforms",
-                    models.ManyToManyField(
-                        blank=True, related_name="games", to="games.platform"
-                    ),
+                    models.ManyToManyField(blank=True, related_name="games", to="games.platform"),
                 ),
             ],
             options={"ordering": ["title"]},

@@ -1,0 +1,52 @@
+{% load marketplace_tags %}
+<div id="cart-summary">
+    {% if priced.lines %}
+    <div class="glass-panel divide-y divide-border-subtle/60 rounded-xl border border-border-subtle/60">
+        {% for line in priced.lines %}
+        <div class="flex items-center gap-4 p-4">
+            <div class="min-w-0 flex-1">
+                <p class="truncate font-bold text-text-primary">{{ line.product }}</p>
+                <p class="text-xs text-text-secondary">{{ line.unit_price_minor|money:priced.currency }} each</p>
+            </div>
+            <form method="post" action="{% url 'marketplace:cart_update' %}" class="flex items-center gap-2"
+                  hx-post="{% url 'marketplace:cart_update' %}" hx-target="#cart-summary" hx-swap="outerHTML">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ line.product.pk }}">
+                <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="{{ line.product.max_per_order }}"
+                       class="w-16 rounded-lg border border-border-subtle bg-surface px-2 py-1 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                <button type="submit" class="text-xs text-text-secondary hover:text-text-primary">Update</button>
+            </form>
+            <p class="w-24 text-right font-bold text-text-primary">{{ line.line_total_minor|money:priced.currency }}</p>
+            <form method="post" action="{% url 'marketplace:cart_remove' %}"
+                  hx-post="{% url 'marketplace:cart_remove' %}" hx-target="#cart-summary" hx-swap="outerHTML">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ line.product.pk }}">
+                <button type="submit" class="text-xs text-text-secondary hover:text-red-400">Remove</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'marketplace:coupon_validate' %}"
+          hx-post="{% url 'marketplace:coupon_validate' %}" hx-target="#cart-summary" hx-swap="outerHTML"
+          class="mt-4 flex gap-2">
+        {% csrf_token %}
+        <input type="text" name="code" placeholder="Coupon code" value="{{ coupon.code|default:'' }}"
+               class="flex-1 rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end">
+        <button type="submit" class="rounded-lg border border-border-subtle px-4 py-2 text-sm font-bold text-text-primary hover:bg-surface">Apply</button>
+    </form>
+
+    <div class="glass-panel mt-4 space-y-2 rounded-xl border border-border-subtle/60 p-4 text-sm">
+        <div class="flex justify-between text-text-secondary"><span>Subtotal</span><span>{{ priced.subtotal_minor|money:priced.currency }}</span></div>
+        {% if priced.discount_minor %}<div class="flex justify-between text-accent-end"><span>Discount</span><span>&minus;{{ priced.discount_minor|money:priced.currency }}</span></div>{% endif %}
+        {% if priced.tax_minor %}<div class="flex justify-between text-text-secondary"><span>Tax</span><span>{{ priced.tax_minor|money:priced.currency }}</span></div>{% endif %}
+        <div class="flex justify-between border-t border-border-subtle/60 pt-2 text-base font-bold text-text-primary"><span>Total</span><span>{{ priced.total_minor|money:priced.currency }}</span></div>
+    </div>
+
+    <a href="{% url 'marketplace:checkout' %}" class="mt-4 block rounded-lg bg-accent-start px-4 py-2 text-center text-sm font-bold text-text-primary transition hover:brightness-110">
+        Proceed to checkout
+    </a>
+    {% else %}
+        {% include "components/empty_state.html" with title="Your cart is empty" action_url="marketplace:browse" action_text="Browse the store" %}
+    {% endif %}
+</div>

@@ -18,7 +18,7 @@ jobs:
       - run: ruff check .
       - run: black --check .
 
-  test:
+  test-postgres:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -47,3 +47,19 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python manage.py migrate
       - run: python manage.py test
+
+  test-sqlite:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: gamekiro.settings.dev
+      DJANGO_SECRET_KEY: ci-test-secret-key
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python manage.py migrate
+      - run: python manage.py check
+      - run: python manage.py test --exclude-tag=concurrency

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load marketplace_tags %}
+
+{% block title %}Your Orders | GameKiro Store{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+    <h1 class="text-3xl font-bold text-text-primary">Your Orders</h1>
+
+    {% if orders %}
+    <div class="glass-panel divide-y divide-border-subtle/60 rounded-xl border border-border-subtle/60">
+        {% for order in orders %}
+        <a href="{% url 'marketplace:order_detail' order.reference %}" class="flex items-center justify-between p-4 transition hover:bg-surface">
+            <div>
+                <p class="font-bold text-text-primary">{{ order.reference }}</p>
+                <p class="text-xs text-text-secondary">{{ order.created_at|date:"M j, Y" }} &middot; {{ order.get_status_display }}</p>
+            </div>
+            <p class="font-bold text-text-primary">{{ order.total_minor|money:order.currency }}</p>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+        {% include "components/empty_state.html" with title="No orders yet" action_url="marketplace:browse" action_text="Browse the store" %}
+    {% endif %}
+</div>
+{% endblock %}

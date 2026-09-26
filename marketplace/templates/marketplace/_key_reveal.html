@@ -1,0 +1,8 @@
+<div class="mt-2 rounded-lg border border-border-subtle bg-surface p-3 text-left">
+    {% if plaintext_key %}
+        <p class="font-mono text-sm text-text-primary select-all">{{ plaintext_key }}</p>
+        <p class="mt-1 text-xs text-text-secondary">Save this key now &mdash; treat it like a password.</p>
+    {% elif error %}
+        <p class="text-xs text-red-400">{{ error }}</p>
+    {% endif %}
+</div>

@@ -1,0 +1,25 @@
+{% load marketplace_tags %}
+<article class="glass-panel overflow-hidden rounded-xl border border-border-subtle/60 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
+    <a href="{% url 'marketplace:product_detail' product.slug %}" class="block">
+        {% if product.game.cover_image %}
+            <img src="{{ product.game.cover_image.url }}" alt="{{ product.game.title }} cover" class="h-40 w-full object-cover">
+        {% else %}
+            <div class="flex h-40 w-full items-center justify-center bg-surface-elevated text-3xl font-bold text-text-secondary">
+                {{ product.game.title|first|upper }}
+            </div>
+        {% endif %}
+    </a>
+    <div class="p-4">
+        <p class="text-xs font-bold uppercase tracking-wide text-text-secondary">{{ product.activation_platform.name }} &middot; {{ product.region.name }}</p>
+        <h3 class="mt-1 text-base font-bold">
+            <a href="{% url 'marketplace:product_detail' product.slug %}" class="text-text-primary hover:underline">{{ product.game.title }}{% if product.edition %} &mdash; {{ product.edition }}{% endif %}</a>
+        </h3>
+        <div class="mt-3 flex items-center gap-2">
+            {% if product.is_on_sale %}
+                <span class="text-sm text-text-secondary line-through">{{ product.compare_at_price_minor|money:product.currency }}</span>
+                <span class="rounded-full bg-accent-start/20 px-2 py-0.5 text-xs font-bold text-accent-end">Sale</span>
+            {% endif %}
+            <span class="text-lg font-bold text-text-primary">{{ product.unit_price_minor|money:product.currency }}</span>
+        </div>
+    </div>
+</article>

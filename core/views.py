@@ -1,14 +1,17 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Avg, Count
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.generic import TemplateView
 
-from forum.models import Category, Thread
+from forum.models import Category, Post, Thread
 from games.models import Game, Review
 from gamification.models import UserBadge
 from moderation.services import hidden_object_ids
 from news.models import Article
 from reputation.models import KarmaScore
+
+KARMA_BADGE_THRESHOLD = 50
 
 
 def home(request):
@@ -51,6 +54,39 @@ def home(request):
     for game in top_rated_games:
         game.rounded_rating = round(game.avg_rating)
 
+    User = get_user_model()
+    site_stats = {
+        "member_count": User.objects.count(),
+        "game_count": Game.objects.count(),
+        "thread_count": Thread.objects.count(),
+        "post_count": Post.objects.count(),
+    }
+
+    greeting_hour = timezone.localtime().hour
+    if greeting_hour < 12:
+        greeting = "Good morning"
+    elif greeting_hour < 18:
+        greeting = "Good afternoon"
+    else:
+        greeting = "Good evening"
+
+    personal_stats = None
+    if request.user.is_authenticated:
+        karma_score = (
+            KarmaScore.objects.filter(user=request.user).values_list("score", flat=True).first()
+            or 0
+        )
+        personal_stats = {
+            "karma_score": karma_score,
+            "karma_progress_percent": min(
+                100, round(max(karma_score, 0) / KARMA_BADGE_THRESHOLD * 100)
+            ),
+            "karma_badge_threshold": KARMA_BADGE_THRESHOLD,
+            "badge_count": UserBadge.objects.filter(user=request.user).count(),
+            "thread_count": Thread.objects.filter(author=request.user).count(),
+            "post_count": Post.objects.filter(author=request.user).count(),
+        }
+
     return render(
         request,
         "core/home.html",
@@ -63,6 +99,9 @@ def home(request):
             "recent_reviews": recent_reviews,
             "recent_badges": recent_badges,
             "top_rated_games": top_rated_games,
+            "site_stats": site_stats,
+            "personal_stats": personal_stats,
+            "greeting": greeting,
         },
     )
 
@@ -77,3 +116,7 @@ class TermsOfServiceView(TemplateView):
 
 class CookiePolicyView(TemplateView):
     template_name = "core/cookie_policy.html"
+
+
+class RefundPolicyView(TemplateView):
+    template_name = "core/refund_policy.html"

@@ -9,4 +9,7 @@ INSTALLED_APPS += ["django_extensions"]
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+MARKETPLACE_ALLOW_MOCK = True
+PAYMENT_PROVIDERS_ENABLED = env.list("PAYMENT_PROVIDERS_ENABLED", default=["mock"])
+
 AXES_ENABLED = False

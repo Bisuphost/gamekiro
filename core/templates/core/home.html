@@ -3,8 +3,56 @@
 {% block title %}GameKiro — Home{% endblock %}
 
 {% block content %}
-<div class="w-full space-y-10">
-    <section class="animate-fade-in-up">
+<div class="w-full space-y-6">
+    <section class="animate-fade-in-up flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-bold text-text-primary sm:text-2xl">
+                {% if user.is_authenticated %}{{ greeting }}, {{ user.username }}{% else %}Welcome to GameKiro{% endif %}
+            </h1>
+            <p class="mt-1 text-sm text-text-secondary">
+                {% if personal_stats %}
+                    <span class="font-bold text-accent-cyan">{{ personal_stats.karma_score }}</span> karma
+                    &middot; {{ personal_stats.badge_count }} badges
+                    &middot; {{ personal_stats.thread_count }} threads
+                    &middot; {{ personal_stats.post_count }} posts
+                {% else %}
+                    Your gaming community hub.
+                {% endif %}
+            </p>
+        </div>
+        {% if personal_stats %}
+        <div class="w-full sm:w-48">
+            <div class="flex items-center justify-between text-[11px] text-text-secondary">
+                <span>Karma Star badge</span>
+                <span>{{ personal_stats.karma_score }}/{{ personal_stats.karma_badge_threshold }}</span>
+            </div>
+            <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
+                <div class="h-full rounded-full bg-accent-start" style="width: {{ personal_stats.karma_progress_percent }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="grid animate-fade-in-up grid-cols-2 gap-2 [animation-delay:50ms] sm:grid-cols-4">
+        <div class="glass-panel rounded-lg border border-border-subtle/60 px-3 py-2.5 text-center">
+            <p class="text-lg font-bold text-text-primary">{{ site_stats.member_count }}</p>
+            <p class="text-[10px] uppercase tracking-wide text-text-secondary">Members</p>
+        </div>
+        <div class="glass-panel rounded-lg border border-border-subtle/60 px-3 py-2.5 text-center">
+            <p class="text-lg font-bold text-text-primary">{{ site_stats.game_count }}</p>
+            <p class="text-[10px] uppercase tracking-wide text-text-secondary">Games</p>
+        </div>
+        <div class="glass-panel rounded-lg border border-border-subtle/60 px-3 py-2.5 text-center">
+            <p class="text-lg font-bold text-text-primary">{{ site_stats.post_count }}</p>
+            <p class="text-[10px] uppercase tracking-wide text-text-secondary">Forum Posts</p>
+        </div>
+        <div class="glass-panel rounded-lg border border-border-subtle/60 px-3 py-2.5 text-center">
+            <p class="text-lg font-bold text-text-primary">{{ site_stats.thread_count }}</p>
+            <p class="text-[10px] uppercase tracking-wide text-text-secondary">Threads</p>
+        </div>
+    </section>
+
+    <section class="animate-fade-in-up [animation-delay:75ms]">
         {% if featured_article %}
         <a href="{% url 'news:detail' featured_article.slug %}"
            class="relative block overflow-hidden rounded-xl border border-border-subtle/60">
@@ -12,32 +60,33 @@
             <img src="{{ featured_article.cover_image.url }}" alt="{{ featured_article.title }}"
                  class="absolute inset-0 h-full w-full object-cover">
             {% else %}
-            <div class="absolute inset-0 bg-gradient-to-br from-surface to-surface-elevated"></div>
+            <div class="absolute inset-0 bg-surface"></div>
             {% endif %}
-            <div class="absolute inset-0 bg-gradient-to-t from-bg-base/95 via-bg-base/50 to-transparent"></div>
-            <div class="relative flex h-72 flex-col justify-end p-6 sm:h-96 sm:p-10">
-                <p class="text-xs font-bold uppercase tracking-wide text-accent-end">Latest News</p>
-                <h1 class="mt-2 max-w-2xl text-2xl font-bold text-text-primary sm:text-4xl">{{ featured_article.title }}</h1>
-                {% if featured_article.summary %}
-                <p class="mt-3 max-w-2xl text-sm text-text-secondary sm:text-base">{{ featured_article.summary }}</p>
-                {% endif %}
-                <p class="mt-4 text-xs text-text-secondary">
-                    {% if featured_article.author %}{{ featured_article.author.username }} &middot; {% endif %}{{ featured_article.published_at|date:"M j, Y" }}
-                </p>
+            <div class="relative flex h-48 flex-col justify-end p-4 sm:h-64 sm:p-6">
+                <div class="glass-panel-elevated max-w-2xl rounded-lg border border-border-subtle/60 p-3 sm:p-4">
+                    <p class="text-[11px] font-bold uppercase tracking-wide text-accent-end">Latest News</p>
+                    <h2 class="mt-1 text-lg font-bold text-text-primary sm:text-2xl">{{ featured_article.title }}</h2>
+                    {% if featured_article.summary %}
+                    <p class="mt-2 hidden text-sm text-text-secondary sm:block">{{ featured_article.summary|truncatewords:22 }}</p>
+                    {% endif %}
+                    <p class="mt-2 text-xs text-text-secondary">
+                        {% if featured_article.author %}{{ featured_article.author.username }} &middot; {% endif %}{{ featured_article.published_at|date:"M j, Y" }}
+                    </p>
+                </div>
             </div>
         </a>
         {% else %}
-        <div class="glass-panel flex h-72 flex-col items-center justify-center gap-3 rounded-xl border border-border-subtle/60 p-6 text-center sm:h-96">
+        <div class="glass-panel flex h-48 flex-col items-center justify-center gap-3 rounded-xl border border-border-subtle/60 p-6 text-center sm:h-64">
             <p class="text-sm text-text-secondary">No news yet.</p>
         </div>
         {% endif %}
     </section>
 
-    <div class="grid animate-fade-in-up grid-cols-1 gap-8 [animation-delay:100ms] lg:grid-cols-3">
-        <div class="space-y-8 lg:col-span-2">
+    <div class="grid animate-fade-in-up grid-cols-1 gap-6 [animation-delay:100ms] lg:grid-cols-3">
+        <div class="space-y-6 lg:col-span-2">
             <section>
-                <h2 class="mb-4 text-lg font-bold text-text-primary">Popular Forums</h2>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <h2 class="mb-3 text-base font-bold text-text-primary">Popular Forums</h2>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {% for category in popular_categories %}
                         {% include "components/forum_card.html" with category=category %}
                     {% empty %}
@@ -47,11 +96,11 @@
             </section>
 
             <section>
-                <div class="mb-4 flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-text-primary">Top Rated Games</h2>
+                <div class="mb-3 flex items-center justify-between">
+                    <h2 class="text-base font-bold text-text-primary">Top Rated Games</h2>
                     <a href="{% url 'games:list' %}" class="text-sm text-text-secondary hover:text-text-primary">View all</a>
                 </div>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {% for game in top_rated_games %}
                         {% include "components/game_card.html" with game=game %}
                     {% empty %}
@@ -61,11 +110,11 @@
             </section>
 
             <section>
-                <div class="mb-4 flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-text-primary">More News</h2>
+                <div class="mb-3 flex items-center justify-between">
+                    <h2 class="text-base font-bold text-text-primary">More News</h2>
                     <a href="{% url 'news:list' %}" class="text-sm text-text-secondary hover:text-text-primary">View all</a>
                 </div>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {% for article in latest_news %}
                         {% include "components/news_card.html" with article=article %}
                     {% empty %}
@@ -75,15 +124,23 @@
             </section>
         </div>
 
-        <aside class="space-y-6 lg:col-span-1">
-            <section>
-                <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-secondary">Latest Activity</h2>
-                <div class="space-y-1">
+        <aside class="space-y-5 lg:col-span-1">
+            <section class="glass-panel rounded-xl border border-border-subtle/60 p-3.5">
+                <h2 class="mb-2.5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-text-secondary">
+                    <span class="h-1.5 w-1.5 rounded-full bg-accent-cyan"></span>
+                    Live Activity
+                </h2>
+                <div class="space-y-0.5">
                     {% for thread in recent_threads %}
                     <a href="{% url 'forum:thread_detail' thread.category.slug thread.slug %}"
-                       class="block rounded-lg p-2 transition hover:bg-surface-elevated/60">
-                        <p class="truncate text-sm font-bold text-text-primary">{{ thread.title }}</p>
-                        <p class="truncate text-xs text-text-secondary">{{ thread.author.username }} in {{ thread.category.name }} &middot; {{ thread.created_at|timesince }} ago</p>
+                       class="flex items-start gap-2 rounded-lg p-1.5 transition hover:bg-surface-elevated/60">
+                        <svg class="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                        </svg>
+                        <span class="min-w-0">
+                            <p class="truncate text-xs"><span class="font-bold text-text-primary">{{ thread.author.username }}</span> <span class="text-text-secondary">posted in</span> <span class="text-text-primary">{{ thread.title }}</span></p>
+                            <p class="truncate text-[11px] text-text-secondary">{{ thread.category.name }} &middot; {{ thread.created_at|timesince }} ago</p>
+                        </span>
                     </a>
                     {% empty %}
                     <p class="text-sm text-text-secondary">No threads yet.</p>
@@ -92,8 +149,8 @@
             </section>
 
             <section>
-                <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-secondary">Top Contributors</h2>
-                <div class="space-y-3">
+                <h2 class="mb-2.5 text-xs font-bold uppercase tracking-wide text-text-secondary">Top Contributors</h2>
+                <div class="space-y-2">
                     {% for contributor in top_contributors %}
                         {% include "components/contributor_card.html" with contributor=contributor %}
                     {% empty %}
@@ -103,8 +160,8 @@
             </section>
 
             <section>
-                <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-secondary">Latest Reviews</h2>
-                <div class="space-y-3">
+                <h2 class="mb-2.5 text-xs font-bold uppercase tracking-wide text-text-secondary">Latest Reviews</h2>
+                <div class="space-y-2">
                     {% for review in recent_reviews %}
                         {% include "components/review_card.html" with review=review %}
                     {% empty %}
@@ -114,8 +171,8 @@
             </section>
 
             <section>
-                <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-text-secondary">Recent Achievements</h2>
-                <div class="space-y-3">
+                <h2 class="mb-2.5 text-xs font-bold uppercase tracking-wide text-text-secondary">Recent Achievements</h2>
+                <div class="space-y-2">
                     {% for user_badge in recent_badges %}
                         {% include "components/achievement_card.html" with user_badge=user_badge %}
                     {% empty %}

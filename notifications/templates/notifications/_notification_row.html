@@ -27,6 +27,14 @@
         </a>
         {% elif notification.verb == "badge_earned" %}
         <span class="text-text-primary">You earned the "{{ notification.target.name }}" badge</span>
+        {% elif notification.verb == "order_fulfilled" %}
+        <a href="{% url 'marketplace:order_detail' notification.target.reference %}" class="text-text-primary hover:underline">
+            Your order {{ notification.target.reference }} has been fulfilled &mdash; your keys are ready
+        </a>
+        {% elif notification.verb == "order_needs_review" %}
+        <a href="{% url 'marketplace:order_detail' notification.target.reference %}" class="text-text-primary hover:underline">
+            Your order {{ notification.target.reference }} needs a closer look from our team
+        </a>
         {% endif %}
         <p class="mt-1 text-sm text-text-secondary">{{ notification.created_at|date:"M j, Y, g:i a" }}</p>
     </div>
@@ -36,7 +44,7 @@
           hx-target="#notification-{{ notification.pk }}" hx-swap="outerHTML">
         {% csrf_token %}
         <input type="hidden" name="page" value="{{ page_number }}">
-        <button type="submit" class="text-sm text-text-secondary underline underline-offset-2 hover:text-text-primary">Mark read</button>
+        <button type="submit" class="rounded-lg border border-border-subtle px-3 py-1.5 text-xs font-bold text-text-secondary transition hover:border-accent-start/50 hover:bg-surface-elevated hover:text-text-primary">Mark read</button>
     </form>
     {% endif %}
 </div>

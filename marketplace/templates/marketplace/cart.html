@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Cart | GameKiro Store{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+    <h1 class="text-3xl font-bold text-text-primary">Your Cart</h1>
+    {% include "marketplace/_cart_summary.html" %}
+</div>
+{% endblock %}

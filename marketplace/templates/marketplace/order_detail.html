@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load marketplace_tags %}
+
+{% block title %}Order {{ order.reference }} | GameKiro Store{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-text-primary">Order {{ order.reference }}</h1>
+        <p class="mt-1 text-sm text-text-secondary">Placed {{ order.created_at|date:"M j, Y, P" }}</p>
+    </div>
+
+    {% include "marketplace/_order_status.html" %}
+
+    {% if order.status == "pending_payment" %}
+    <form method="post" action="{% url 'marketplace:order_pay' order.reference %}" class="glass-panel space-y-3 rounded-xl border border-border-subtle/60 p-4">
+        {% csrf_token %}
+        {% include "marketplace/_payment_method_picker.html" %}
+        <button type="submit" {% if not payment_providers %}disabled{% endif %} class="w-full rounded-lg bg-accent-start px-4 py-3 text-sm font-bold text-text-primary transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+            Pay now &middot; {{ order.total_minor|money:order.currency }}
+        </button>
+        {% if order.reservation_expires_at %}<p class="text-xs text-text-secondary">Your items are reserved until {{ order.reservation_expires_at|date:"P" }}.</p>{% endif %}
+    </form>
+    {% endif %}
+
+    {% if order.review_reason %}
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4 text-sm text-text-secondary">
+        This order needs a closer look from our team: {{ order.review_reason }}. We'll follow up by email.
+    </div>
+    {% endif %}
+
+    <div class="glass-panel divide-y divide-border-subtle/60 rounded-xl border border-border-subtle/60">
+        {% for item in items %}
+        <div class="flex items-center justify-between p-4">
+            <div>
+                <p class="font-bold text-text-primary">{{ item.product_title }}</p>
+                <p class="text-xs text-text-secondary">{{ item.platform_name }} &middot; {{ item.region_name }}</p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-text-primary">{{ item.unit_price_minor|money:order.currency }}</p>
+                {% if item.delivered_at %}
+                    {% if item.entitlement %}
+                    <form method="post" action="{% url 'marketplace:library_reveal' item.entitlement.pk %}"
+                          hx-post="{% url 'marketplace:library_reveal' item.entitlement.pk %}" hx-target="#reveal-{{ item.pk }}" hx-swap="innerHTML">
+                        {% csrf_token %}
+                        <button type="submit" class="mt-1 text-xs text-accent-end hover:underline">Reveal key</button>
+                    </form>
+                    <div id="reveal-{{ item.pk }}"></div>
+                    {% endif %}
+                {% else %}
+                    <p class="mt-1 text-xs text-text-secondary">Pending delivery</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="glass-panel space-y-2 rounded-xl border border-border-subtle/60 p-4 text-sm">
+        <div class="flex justify-between text-text-secondary"><span>Subtotal</span><span>{{ order.subtotal_minor|money:order.currency }}</span></div>
+        {% if order.discount_minor %}<div class="flex justify-between text-accent-end"><span>Discount</span><span>&minus;{{ order.discount_minor|money:order.currency }}</span></div>{% endif %}
+        <div class="flex justify-between border-t border-border-subtle/60 pt-2 text-base font-bold text-text-primary"><span>Total</span><span>{{ order.total_minor|money:order.currency }}</span></div>
+    </div>
+</div>
+{% endblock %}

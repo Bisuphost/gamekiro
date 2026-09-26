@@ -1,45 +1,68 @@
 {% extends "base.html" %}
 
-{% block title %}News{% endblock %}
+{% block title %}News | GameKiro{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-4xl">
-    <h1 class="mb-6 text-2xl font-bold text-text-primary">News</h1>
-
-    <div class="space-y-4">
-        {% for article in articles %}
-        <a href="{% url 'news:detail' article.slug %}"
-           class="glass-panel flex gap-4 rounded-xl border border-border-subtle/60 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-accent-end/40">
-            {% if article.cover_image %}
-            <img src="{{ article.cover_image.url }}" alt="{{ article.title }}" class="h-24 w-32 shrink-0 rounded-lg object-cover">
-            {% else %}
-            <div class="h-24 w-32 shrink-0 rounded-lg bg-surface-elevated"></div>
-            {% endif %}
-            <div class="min-w-0">
-                <p class="font-bold text-text-primary">{{ article.title }}</p>
-                {% if article.summary %}
-                <p class="mt-1 line-clamp-2 text-sm text-text-secondary">{{ article.summary }}</p>
-                {% endif %}
-                <p class="mt-2 text-xs text-text-secondary">
-                    {% if article.author %}{{ article.author.username }} &middot; {% endif %}{{ article.published_at|date:"M j, Y" }}
-                </p>
+<div class="mx-auto max-w-6xl space-y-10">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-text-primary">Video games news on PC and consoles</h1>
+            <p class="mt-1 text-text-secondary">The latest from the GameKiro community.</p>
+        </div>
+        <form method="get" class="flex items-center gap-2">
+            <label for="news-search" class="sr-only">Search news</label>
+            <div class="relative">
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <input type="search" id="news-search" name="q" value="{{ query }}" placeholder="Search news&hellip;"
+                       class="w-56 rounded-lg border border-border-subtle bg-surface py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end">
             </div>
-        </a>
-        {% empty %}
-        {% include "components/empty_state.html" with title="No news yet" message="Check back soon for community updates." %}
-        {% endfor %}
+        </form>
     </div>
 
+    {% if featured_articles or secondary_articles %}
+    <section class="animate-fade-in-up space-y-4">
+        {% if featured_articles %}
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {% for article in featured_articles %}
+                {% include "components/news_feature_card.html" with article=article size="lg" %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if secondary_articles %}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {% for article in secondary_articles %}
+                {% include "components/news_feature_card.html" with article=article size="md" %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% if articles or not featured_articles %}
+    <section class="animate-fade-in-up [animation-delay:100ms]">
+        <h2 class="mb-4 text-xl font-bold text-text-primary">{% if query %}Results for &ldquo;{{ query }}&rdquo;{% else %}Top Stories{% endif %}</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {% for article in articles %}
+                {% include "components/news_feature_card.html" with article=article size="sm" %}
+            {% empty %}
+                {% include "components/empty_state.html" with title="No news yet" message="Check back soon for community updates." %}
+            {% endfor %}
+        </div>
+    </section>
+
     {% if articles.has_other_pages %}
-    <div class="mt-6 flex items-center gap-4 text-sm text-text-secondary">
+    <div class="flex items-center gap-4 text-sm text-text-secondary">
         {% if articles.has_previous %}
-        <a href="?page={{ articles.previous_page_number }}" class="hover:text-text-primary">Previous</a>
+        <a href="?{% if query %}q={{ query }}&{% endif %}page={{ articles.previous_page_number }}" class="hover:text-text-primary">Previous</a>
         {% endif %}
         <span>Page {{ articles.number }} of {{ articles.paginator.num_pages }}</span>
         {% if articles.has_next %}
-        <a href="?page={{ articles.next_page_number }}" class="hover:text-text-primary">Next</a>
+        <a href="?{% if query %}q={{ query }}&{% endif %}page={{ articles.next_page_number }}" class="hover:text-text-primary">Next</a>
         {% endif %}
     </div>
+    {% endif %}
     {% endif %}
 </div>
 {% endblock %}

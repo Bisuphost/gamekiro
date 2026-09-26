@@ -171,9 +171,7 @@ class ProfileGameTests(TestCase):
         self.assertEqual(ProfileGame.objects.count(), 1)
 
         self.client.login(username="rival", password="password123")
-        response = self.client.post(
-            reverse("accounts:profile-game-remove", args=[profile_game.pk])
-        )
+        response = self.client.post(reverse("accounts:profile-game-remove", args=[profile_game.pk]))
         self.assertEqual(response.status_code, 404)
         self.assertTrue(ProfileGame.objects.filter(pk=profile_game.pk).exists())
 

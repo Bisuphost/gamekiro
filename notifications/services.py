@@ -6,6 +6,13 @@ from messaging.models import Message
 
 from .models import Notification
 
+
+def _load_orders(ids):
+    from marketplace.models import Order
+
+    return Order.objects.filter(pk__in=ids)
+
+
 TARGET_LOADERS = {
     "post": lambda ids: Post.objects.select_related("thread", "thread__category").filter(
         pk__in=ids
@@ -13,6 +20,7 @@ TARGET_LOADERS = {
     "thread": lambda ids: Thread.objects.select_related("category").filter(pk__in=ids),
     "message": lambda ids: Message.objects.filter(pk__in=ids),
     "badge": lambda ids: Badge.objects.filter(pk__in=ids),
+    "order": _load_orders,
 }
 
 

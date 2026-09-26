@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Import Inventory | GameKiro{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+    <h1 class="text-2xl font-bold text-text-primary">Import Inventory</h1>
+
+    <form method="post" class="glass-panel space-y-4 rounded-xl border border-border-subtle/60 p-6">
+        {% csrf_token %}
+        {% for field in form %}
+        <div>
+            <label class="text-sm font-medium text-text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field|add_class:"mt-1 block w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 font-normal text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end" }}
+            {% if field.errors %}<p class="mt-1 text-xs text-red-400">{{ field.errors|join:", " }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+            Import keys
+        </button>
+    </form>
+
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <h2 class="text-sm font-bold uppercase tracking-wide text-text-secondary">Recent imports</h2>
+        <div class="mt-2 divide-y divide-border-subtle/60 text-sm">
+            {% for batch in recent_batches %}
+            <div class="flex items-center justify-between py-2">
+                <span>{{ batch.product }}</span>
+                <span class="text-text-secondary">{{ batch.imported_count }} imported, {{ batch.duplicate_count }} dup, {{ batch.invalid_count }} invalid</span>
+            </div>
+            {% empty %}
+            <p class="py-2 text-text-secondary">No imports yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

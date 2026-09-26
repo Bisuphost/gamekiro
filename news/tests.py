@@ -74,6 +74,58 @@ class ArticleTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Preview body")
 
+    def test_first_two_articles_are_featured_and_next_three_secondary(self):
+        for i in range(6):
+            Article.objects.create(
+                title=f"Article {i}",
+                slug=f"article-{i}",
+                body="Body",
+                is_published=True,
+                published_at=timezone.now() - timezone.timedelta(days=i),
+            )
+
+        response = self.client.get(reverse("news:list"))
+
+        self.assertEqual(len(response.context["featured_articles"]), 2)
+        self.assertEqual(len(response.context["secondary_articles"]), 3)
+        self.assertEqual(
+            [a.title for a in response.context["featured_articles"]],
+            ["Article 0", "Article 1"],
+        )
+        self.assertEqual(
+            [a.title for a in response.context["secondary_articles"]],
+            ["Article 2", "Article 3", "Article 4"],
+        )
+        self.assertEqual([a.title for a in response.context["articles"]], ["Article 5"])
+
+    def test_search_filters_articles_by_title(self):
+        Article.objects.create(
+            title="Cozy Farming Sim Announced", slug="cozy-farm", body="Body", is_published=True
+        )
+        Article.objects.create(
+            title="Racing Game Patch Notes", slug="racing-patch", body="Body", is_published=True
+        )
+
+        response = self.client.get(reverse("news:list"), {"q": "farming"})
+
+        self.assertContains(response, "Cozy Farming Sim Announced")
+        self.assertNotContains(response, "Racing Game Patch Notes")
+
+    def test_hero_sections_do_not_repeat_on_page_two(self):
+        for i in range(20):
+            Article.objects.create(
+                title=f"Article {i}",
+                slug=f"article-{i}",
+                body="Body",
+                is_published=True,
+                published_at=timezone.now() - timezone.timedelta(days=i),
+            )
+
+        response = self.client.get(reverse("news:list"), {"page": 2})
+
+        self.assertNotIn("featured_articles", response.context)
+        self.assertNotIn("secondary_articles", response.context)
+
     def test_articles_ordered_by_published_at_descending(self):
         Article.objects.create(
             title="Older",

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Wishlist | GameKiro Store{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+    <h1 class="text-3xl font-bold text-text-primary">Your Wishlist</h1>
+
+    {% if items %}
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {% for item in items %}
+            {% include "components/product_card.html" with product=item.product %}
+        {% endfor %}
+    </div>
+    {% else %}
+        {% include "components/empty_state.html" with title="Your wishlist is empty" action_url="marketplace:browse" action_text="Browse the store" %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load marketplace_tags %}
+
+{% block title %}Checkout | GameKiro Store{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+    <h1 class="text-3xl font-bold text-text-primary">Checkout</h1>
+
+    {% if priced.lines %}
+    <div class="glass-panel divide-y divide-border-subtle/60 rounded-xl border border-border-subtle/60">
+        {% for line in priced.lines %}
+        <div class="flex items-center justify-between p-4">
+            <div>
+                <p class="font-bold text-text-primary">{{ line.product }}</p>
+                <p class="text-xs text-text-secondary">Qty {{ line.quantity }}</p>
+            </div>
+            <p class="font-bold text-text-primary">{{ line.line_total_minor|money:priced.currency }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="glass-panel space-y-2 rounded-xl border border-border-subtle/60 p-4 text-sm">
+        <div class="flex justify-between text-text-secondary"><span>Subtotal</span><span>{{ priced.subtotal_minor|money:priced.currency }}</span></div>
+        {% if priced.discount_minor %}<div class="flex justify-between text-accent-end"><span>Discount ({{ coupon.code }})</span><span>&minus;{{ priced.discount_minor|money:priced.currency }}</span></div>{% endif %}
+        {% if priced.tax_minor %}<div class="flex justify-between text-text-secondary"><span>Tax</span><span>{{ priced.tax_minor|money:priced.currency }}</span></div>{% endif %}
+        <div class="flex justify-between border-t border-border-subtle/60 pt-2 text-base font-bold text-text-primary"><span>Total</span><span>{{ priced.total_minor|money:priced.currency }}</span></div>
+    </div>
+
+    <p class="text-xs text-text-secondary">
+        By placing this order you agree to our <a href="{% url 'core:terms' %}" class="underline hover:text-text-primary">Terms of Service</a>
+        and <a href="{% url 'core:refunds' %}" class="underline hover:text-text-primary">Refund Policy</a>.
+    </p>
+
+    <form method="post" action="{% url 'marketplace:checkout_confirm' %}">
+        {% csrf_token %}
+        {% include "marketplace/_payment_method_picker.html" %}
+        <button type="submit" {% if not payment_providers %}disabled{% endif %} class="mt-4 w-full rounded-lg bg-accent-start px-4 py-3 text-sm font-bold text-text-primary transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+            Place order &middot; {{ priced.total_minor|money:priced.currency }}
+        </button>
+    </form>
+    {% else %}
+        {% include "components/empty_state.html" with title="Your cart is empty" action_url="marketplace:browse" action_text="Browse the store" %}
+    {% endif %}
+</div>
+{% endblock %}

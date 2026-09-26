@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load marketplace_tags %}
+
+{% block title %}Mock Payment | GameKiro Store{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md space-y-6">
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-6 text-center">
+        <p class="text-xs font-bold uppercase tracking-wide text-accent-end">Test payment provider</p>
+        <h1 class="mt-2 text-xl font-bold text-text-primary">Pay {{ order.total_minor|money:order.currency }}</h1>
+        <p class="mt-2 text-sm text-text-secondary">Order {{ order.reference }}</p>
+        <p class="mt-4 text-xs text-text-secondary">
+            This is a simulated checkout page for the mock payment provider. No real payment is processed.
+        </p>
+
+        <div class="mt-6 flex flex-col gap-3">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="outcome" value="succeed">
+                <button type="submit" class="w-full rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+                    Simulate successful payment
+                </button>
+            </form>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="outcome" value="fail">
+                <button type="submit" class="w-full rounded-lg border border-border-subtle px-4 py-2 text-sm font-bold text-text-primary hover:bg-surface">
+                    Simulate failed payment
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Verify your email | GameKiro Store{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="glass-panel mx-auto max-w-lg space-y-4 rounded-2xl border border-border-subtle/60 px-5 py-10 text-center">
+    <h1 class="text-xl font-bold text-text-primary">Verify your email to buy</h1>
+    <p class="text-sm leading-6 text-text-secondary">
+        To protect buyers and sellers, we need to confirm your email address ({{ user.email }})
+        before you can check out. We've sent a confirmation link — click it and you're set.
+    </p>
+    <form method="post" action="{% url 'marketplace:verify_email_resend' %}">
+        {% csrf_token %}
+        <button type="submit" class="inline-flex rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+            Resend verification email
+        </button>
+    </form>
+    <a href="{% url 'core:home' %}" class="block text-xs text-text-secondary hover:underline">Back to GameKiro</a>
+</div>
+{% endblock %}

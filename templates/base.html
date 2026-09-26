@@ -19,7 +19,7 @@
             left: 0;
             height: 3px;
             width: 0%;
-            background: linear-gradient(to right, #6D28D9, #A855F7);
+            background: var(--color-accent-start);
             z-index: 100;
             opacity: 0;
             transition: width 300ms ease, opacity 200ms ease;
@@ -86,19 +86,19 @@
 <body class="min-h-screen flex flex-col bg-bg-base text-text-primary font-sans antialiased">
     <div id="page-loading-bar"></div>
     <header class="sticky top-0 z-40 border-b border-border-subtle bg-bg-base/95 backdrop-blur">
-        <nav class="flex items-center gap-2 px-3 py-3 sm:gap-4 sm:px-6">
+        <nav class="flex items-center gap-3 px-3 py-3 sm:gap-4 sm:px-6">
             <a href="{% url 'core:home' %}" class="shrink-0">
                 <img src="{% static 'img/logo.png' %}" alt="GameKiro" class="h-5 w-auto sm:h-6">
             </a>
 
-            <form action="{% url 'forum:search' %}" method="get" class="hidden max-w-md flex-1 sm:block">
+            <form action="{% url 'forum:search' %}" method="get" class="hidden max-w-xl flex-1 sm:block">
                 <label for="nav-search" class="sr-only">Search threads</label>
                 <div class="relative">
                     <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
-                    <input type="search" id="nav-search" name="q" placeholder="Search threads&hellip;" value="{{ request.GET.q|default:'' }}"
-                           class="w-full rounded-lg border border-border-subtle bg-surface py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                    <input type="search" id="nav-search" name="q" placeholder="Search forums&hellip;" value="{{ request.GET.q|default:'' }}"
+                           class="w-full rounded-lg border border-border-subtle bg-surface py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-cyan/60">
                 </div>
             </form>
 
@@ -111,6 +111,17 @@
 
             <div class="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
                 {% if user.is_authenticated %}
+                    <a href="{% url 'marketplace:cart' %}" aria-label="Cart"
+                       class="relative rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.827-4.27 2.256-5.618a1.5 1.5 0 0 0-1.44-1.95H5.106M7.5 14.25 5.106 5.272M6 18.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                        </svg>
+                        <span id="cart-count" class="absolute -top-1 -right-1"
+                              hx-get="{% url 'marketplace:cart_count' %}" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                            {% include "marketplace/_cart_count.html" %}
+                        </span>
+                    </a>
+
                     <a href="{% url 'notifications:list' %}" aria-label="Notifications"
                        data-modal-trigger="notifications-modal"
                        hx-get="{% url 'notifications:list' %}" hx-target="#notifications-modal-content" hx-swap="innerHTML"
@@ -124,19 +135,20 @@
                         </span>
                     </a>
 
-                    <div class="hidden items-center gap-3 rounded-full bg-surface-elevated px-3 py-1.5 text-sm font-bold text-text-primary sm:flex"
-                         hx-get="{% url 'accounts:nav-stats' %}" hx-trigger="load, every 30s" hx-swap="innerHTML">
-                        <span class="flex items-center gap-1">0</span>
-                        <span class="flex items-center gap-1">0</span>
-                    </div>
-
                     <a href="{% url 'accounts:profile' user.username %}"
-                       class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold text-text-primary transition hover:ring-2 hover:ring-accent-end">
-                        {{ user.username|first|upper }}
+                       class="flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition hover:bg-surface-elevated">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold text-text-primary">
+                            {{ user.username|first|upper }}
+                        </span>
+                        <span class="hidden text-sm font-bold text-text-primary sm:block">{{ user.username }}</span>
                     </a>
                     <form method="post" action="{% url 'logout' %}" class="hidden sm:block">
                         {% csrf_token %}
-                        <button type="submit" class="text-sm text-text-secondary hover:text-text-primary">Log out</button>
+                        <button type="submit" aria-label="Log out" class="rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-end">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                            </svg>
+                        </button>
                     </form>
                 {% else %}
                     <a href="{% url 'login' %}" class="text-sm text-text-secondary hover:text-text-primary">Log in</a>
@@ -205,8 +217,23 @@
     </div>
 
     <div class="flex w-full flex-1">
-        <aside class="sticky top-[63px] hidden h-[calc(100vh-63px)] w-52 shrink-0 self-start overflow-hidden border-r border-border-subtle px-4 py-4 lg:block">
-            <p class="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-text-secondary">Menu</p>
+        <aside class="sticky top-[63px] hidden h-[calc(100vh-63px)] w-56 shrink-0 flex-col self-start overflow-y-auto border-r border-border-subtle px-2.5 py-3 lg:flex">
+            {% if user.is_authenticated %}
+            <div class="mb-3 flex items-center gap-2.5 rounded-lg border border-border-subtle/60 bg-surface px-2.5 py-2">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold text-text-primary">
+                    {{ user.username|first|upper }}
+                </span>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-bold text-text-primary">{{ user.username }}</p>
+                    <p class="text-xs text-text-secondary">{% if user.is_superuser %}Admin{% elif user.is_staff %}Staff{% else %}Member{% endif %}</p>
+                </div>
+                <div class="flex shrink-0 items-center gap-2 text-xs font-bold text-text-secondary"
+                     hx-get="{% url 'accounts:nav-stats' %}" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                    <span class="flex items-center gap-1">0</span>
+                    <span class="flex items-center gap-1">0</span>
+                </div>
+            </div>
+            {% endif %}
             <nav class="flex flex-col gap-0.5">
                 {% include "components/sidebar_nav.html" with prefix="sidebar" %}
             </nav>

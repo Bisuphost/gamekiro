@@ -3,42 +3,42 @@ from django.db import models
 
 
 class Message(models.Model):
-	sender = models.ForeignKey(
-		settings.AUTH_USER_MODEL,
-		on_delete=models.CASCADE,
-		related_name="sent_messages",
-	)
-	recipient = models.ForeignKey(
-		settings.AUTH_USER_MODEL,
-		on_delete=models.CASCADE,
-		related_name="received_messages",
-	)
-	body = models.TextField()
-	is_read = models.BooleanField(default=False)
-	created_at = models.DateTimeField(auto_now_add=True)
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_messages",
+    )
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="received_messages",
+    )
+    body = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-	class Meta:
-		ordering = ["created_at"]
+    class Meta:
+        ordering = ["created_at"]
 
-	def __str__(self):
-		return f"Message from {self.sender} to {self.recipient}"
+    def __str__(self):
+        return f"Message from {self.sender} to {self.recipient}"
 
 
 class ConversationArchive(models.Model):
-	user = models.ForeignKey(
-		settings.AUTH_USER_MODEL,
-		on_delete=models.CASCADE,
-		related_name="archived_conversations",
-	)
-	partner = models.ForeignKey(
-		settings.AUTH_USER_MODEL,
-		on_delete=models.CASCADE,
-		related_name="conversation_archives",
-	)
-	created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="archived_conversations",
+    )
+    partner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="conversation_archives",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
-	class Meta:
-		constraints = [
-			models.UniqueConstraint(fields=["user", "partner"], name="unique_conversation_archive")
-		]
-		indexes = [models.Index(fields=["user", "partner"])]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "partner"], name="unique_conversation_archive")
+        ]
+        indexes = [models.Index(fields=["user", "partner"])]

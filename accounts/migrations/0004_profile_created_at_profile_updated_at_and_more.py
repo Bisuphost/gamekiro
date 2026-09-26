@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0003_add_missing_profile_website'),
+        ("accounts", "0003_add_missing_profile_website"),
     ]
 
     operations = [

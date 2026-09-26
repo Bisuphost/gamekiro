@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load marketplace_tags %}
+
+{% block title %}{{ product.game.title }} | GameKiro Store{% endblock %}
+
+{% block extra_head %}
+<meta property="og:title" content="{{ product.game.title }}">
+<meta property="og:description" content="{{ product.description|truncatewords:30 }}">
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl space-y-6">
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="glass-panel overflow-hidden rounded-xl border border-border-subtle/60">
+            {% if product.game.cover_image %}
+                <img src="{{ product.game.cover_image.url }}" alt="{{ product.game.title }} cover" class="w-full object-cover">
+            {% else %}
+                <div class="flex h-64 w-full items-center justify-center bg-surface-elevated text-5xl font-bold text-text-secondary">
+                    {{ product.game.title|first|upper }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="glass-panel rounded-xl border border-border-subtle/60 p-6">
+            <p class="text-xs font-bold uppercase tracking-wide text-accent-end">{{ product.activation_platform.name }} &middot; {{ product.region.name }}</p>
+            <h1 class="mt-2 text-2xl font-bold text-text-primary">{{ product.game.title }}{% if product.edition %} &mdash; {{ product.edition }}{% endif %}</h1>
+
+            <div class="mt-4 flex items-center gap-3">
+                {% if product.is_on_sale %}
+                    <span class="text-sm text-text-secondary line-through">{{ product.compare_at_price_minor|money:product.currency }}</span>
+                {% endif %}
+                <span class="text-2xl font-bold text-text-primary">{{ product.unit_price_minor|money:product.currency }}</span>
+            </div>
+
+            <p class="mt-2 text-sm text-text-secondary">
+                {% if available_count > 0 %}{{ available_count }} in stock{% else %}Out of stock{% endif %}
+            </p>
+
+            <form method="post" action="{% url 'marketplace:cart_add' %}" class="mt-6 flex items-center gap-3">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.pk }}">
+                <input type="number" name="quantity" value="1" min="1" max="{{ product.max_per_order }}"
+                       class="w-20 rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-end">
+                <button type="submit" {% if available_count == 0 %}disabled{% endif %}
+                        class="flex-1 rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110 disabled:opacity-50">
+                    Add to cart
+                </button>
+            </form>
+
+            <form method="post" action="{% url 'marketplace:wishlist_toggle' %}" class="mt-3">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.pk }}">
+                <button type="submit" class="text-sm text-text-secondary hover:text-text-primary">
+                    {% if in_wishlist %}Remove from wishlist{% else %}Add to wishlist{% endif %}
+                </button>
+            </form>
+
+            {% if product.publisher %}<p class="mt-6 text-xs text-text-secondary">Publisher: {{ product.publisher }}</p>{% endif %}
+            {% if product.developer %}<p class="text-xs text-text-secondary">Developer: {{ product.developer }}</p>{% endif %}
+        </div>
+    </div>
+
+    {% if product.description %}
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-6">
+        <h2 class="text-lg font-bold text-text-primary">About this game</h2>
+        <div class="mt-3 text-sm leading-6 text-text-secondary">{{ product.description|linebreaks }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

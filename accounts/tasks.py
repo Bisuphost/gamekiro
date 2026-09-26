@@ -4,6 +4,7 @@ from celery import shared_task
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def send_welcome_email(self, user_id):
         logger.warning("Welcome email skipped: missing user %s", user_id)
         return
 
-    profile_url = f"{settings.SITE_URL}/accounts/setup/"
+    profile_url = f"{settings.SITE_URL}{reverse('accounts:profile-setup')}"
     try:
         send_mail(
             subject="Welcome to GameKiro",

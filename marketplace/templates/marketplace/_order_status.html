@@ -1,0 +1,16 @@
+{% load marketplace_tags %}
+<div id="order-status"
+     {% if order.status == "pending_payment" %}
+     hx-get="{% url 'marketplace:order_check_status' order.reference %}" hx-trigger="load delay:4s" hx-swap="outerHTML"
+     {% endif %}>
+    <span class="inline-flex items-center rounded-full border border-border-subtle/60 px-3 py-1 text-xs font-bold text-text-primary">
+        {{ order.get_status_display }}
+    </span>
+    {% if order.status == "pending_payment" %}
+    <p class="mt-2 text-xs text-text-secondary">Waiting for payment confirmation&hellip;</p>
+    <form method="post" action="{% url 'marketplace:order_check_status' order.reference %}" class="mt-2">
+        {% csrf_token %}
+        <button type="submit" class="text-xs text-accent-end hover:underline">Check payment status</button>
+    </form>
+    {% endif %}
+</div>

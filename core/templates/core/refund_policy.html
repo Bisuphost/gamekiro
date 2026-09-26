@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Refund Policy | GameKiro{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-8 pb-16">
+    <div>
+        <h1 class="text-3xl font-bold text-text-primary">Refund Policy</h1>
+        <p class="mt-2 text-sm text-text-secondary">Last updated: September 20, 2026</p>
+    </div>
+
+    <section class="space-y-3">
+        <p class="text-text-secondary">
+            This policy covers digital game keys and other digital products purchased through
+            the GameKiro Store, operated by Cosmic Store LLC. It applies alongside our
+            <a href="{% url 'core:terms' %}" class="underline hover:text-text-primary">Terms of
+            Service</a>.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">1. Before you reveal a key</h2>
+        <p class="text-text-secondary">
+            If you paid for an order but the key has not yet been revealed to you, contact
+            <a href="mailto:support@gamekiro.com" class="underline hover:text-text-primary">support@gamekiro.com</a>
+            with your order reference. We will refund the order in full.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">2. After a key has been revealed</h2>
+        <p class="text-text-secondary">
+            Because a digital key can be used the instant it is revealed, we cannot offer a
+            refund once a key has been shown to you, except where required by applicable
+            consumer-protection law or where the key does not work as described (see below).
+            Revealing a key is a deliberate, logged action on the order page — it does not
+            happen automatically at checkout.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">3. Faulty or invalid keys</h2>
+        <p class="text-text-secondary">
+            If a key you received does not activate, was already redeemed, or does not match
+            the product you purchased, contact support within 14 days of purchase. We will
+            investigate and, where the fault is on our side, either replace the key or issue a
+            refund. We do not automatically issue a second key for an order once one has been
+            delivered — every replacement is reviewed by a person first.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">4. Order delays or fulfilment problems</h2>
+        <p class="text-text-secondary">
+            If you paid and your order does not fulfil within a reasonable time, it will be
+            placed under review automatically and our team is notified. You do not need to
+            request a refund immediately — contact support if you'd like an update or would
+            prefer a refund instead of waiting.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">5. Chargebacks</h2>
+        <p class="text-text-secondary">
+            If you dispute a charge with your bank or card issuer instead of contacting us
+            first, any keys on that order are revoked and the account may be reviewed for abuse.
+            Please contact support before opening a dispute — most issues can be resolved
+            faster that way.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">6. How refunds are paid</h2>
+        <p class="text-text-secondary">
+            Approved refunds are returned to the original payment method. Processing times
+            depend on your payment provider and are outside our control.
+        </p>
+    </section>
+
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-text-primary">7. Contact us</h2>
+        <p class="text-text-secondary">
+            Cosmic Store LLC — <a href="mailto:support@gamekiro.com" class="underline hover:text-text-primary">support@gamekiro.com</a>
+        </p>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load marketplace_tags %}
+
+{% block title %}Order {{ order.reference }} | Store Admin{% endblock %}
+{% block extra_head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-text-primary">Order {{ order.reference }}</h1>
+        <p class="mt-1 text-sm text-text-secondary">{{ order.user }} &middot; {{ order.get_status_display }}</p>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+        <form method="post" action="{% url 'marketplace:manage_order_redrive' order.reference %}">
+            {% csrf_token %}
+            <button type="submit" class="rounded-lg border border-border-subtle px-3 py-1.5 text-xs font-bold text-text-primary hover:bg-surface">
+                Re-drive fulfilment
+            </button>
+        </form>
+        {% if refundable_minor %}
+        <form method="post" action="{% url 'marketplace:manage_order_refund' order.reference %}" class="flex items-center gap-2">
+            {% csrf_token %}
+            <input type="number" name="amount_minor" placeholder="Amount (minor units)" value="{{ refundable_minor }}" max="{{ refundable_minor }}"
+                   class="w-40 rounded-lg border border-border-subtle bg-surface px-2 py-1.5 text-xs text-text-primary">
+            <input type="text" name="reason" placeholder="Reason"
+                   class="w-40 rounded-lg border border-border-subtle bg-surface px-2 py-1.5 text-xs text-text-primary">
+            <button type="submit" class="rounded-lg border border-border-subtle px-3 py-1.5 text-xs font-bold text-text-primary hover:bg-surface">
+                Refund &middot; up to {{ refundable_minor|money:order.currency }}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if payments %}
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <h2 class="text-sm font-bold uppercase tracking-wide text-text-secondary">Payments</h2>
+        <div class="mt-2 divide-y divide-border-subtle/60 text-sm">
+            {% for payment in payments %}
+            <div class="py-2 flex justify-between">
+                <span>{{ payment.provider }} &middot; attempt {{ payment.attempt }} &middot; {{ payment.get_status_display }}</span>
+                <span class="text-text-secondary">{{ payment.amount_minor|money:payment.currency }}{% if payment.refunded_minor %} &middot; {{ payment.refunded_minor|money:payment.currency }} refunded{% endif %}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if refunds %}
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <h2 class="text-sm font-bold uppercase tracking-wide text-text-secondary">Refunds</h2>
+        <div class="mt-2 divide-y divide-border-subtle/60 text-sm">
+            {% for refund in refunds %}
+            <div class="py-2">
+                <div class="flex justify-between">
+                    <span class="font-bold text-text-primary">{{ refund.amount_minor|money:order.currency }} &middot; {{ refund.get_status_display }}</span>
+                    <span class="text-text-secondary">{{ refund.get_source_display }} &middot; {{ refund.created_at|date:"M j, Y H:i" }}</span>
+                </div>
+                {% if refund.reason %}<p class="text-text-secondary">{{ refund.reason }}</p>{% endif %}
+                {% if refund.failure_reason %}<p class="text-red-400">{{ refund.failure_reason }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if disputes %}
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <h2 class="text-sm font-bold uppercase tracking-wide text-text-secondary">Disputes</h2>
+        <div class="mt-2 divide-y divide-border-subtle/60 text-sm">
+            {% for dispute in disputes %}
+            <div class="py-2">
+                <div class="flex justify-between">
+                    <span class="font-bold text-text-primary">{{ dispute.provider }} &middot; {{ dispute.status|default:"open" }}</span>
+                    <span class="text-text-secondary">{% if dispute.closed_at %}closed &middot; {{ dispute.outcome }}{% elif dispute.response_due_at %}respond by {{ dispute.response_due_at|date:"M j, Y H:i" }}{% endif %}</span>
+                </div>
+                {% if dispute.reason %}<p class="text-text-secondary">{{ dispute.reason }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="glass-panel divide-y divide-border-subtle/60 rounded-xl border border-border-subtle/60">
+        {% for item in items %}
+        <div class="flex items-center justify-between p-4 text-sm">
+            <span>{{ item.product_title }}</span>
+            <span class="text-text-secondary">{{ item.unit_price_minor|money:order.currency }}{% if item.delivered_at %} &middot; delivered{% endif %}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <h2 class="text-sm font-bold uppercase tracking-wide text-text-secondary">Audit log</h2>
+        <div class="mt-2 divide-y divide-border-subtle/60 text-sm">
+            {% for entry in audit_entries %}
+            <div class="py-2">
+                <span class="font-bold text-text-primary">{{ entry.action }}</span>
+                <span class="text-text-secondary">&mdash; {{ entry.actor|default:"system" }} &middot; {{ entry.created_at|date:"M j, Y H:i" }}</span>
+            </div>
+            {% empty %}
+            <p class="py-2 text-text-secondary">No audit entries yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
