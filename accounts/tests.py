@@ -78,7 +78,7 @@ class ProfileTests(TestCase):
         mock_delay.assert_not_called()
 
     def test_new_user_is_prompted_for_onboarding_and_can_skip_setup(self):
-        user = User.objects.create_user(username="onboarded", password="password123")
+        User.objects.create_user(username="onboarded", password="password123")
         self.client.login(username="onboarded", password="password123")
         session = self.client.session
         session["onboarding_required"] = True

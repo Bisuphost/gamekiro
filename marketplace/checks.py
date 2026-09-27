@@ -2,10 +2,22 @@ from django.conf import settings
 from django.core.checks import Error, register
 
 
+def _is_production():
+    # Django's test runner forces settings.DEBUG = False for the duration of
+    # every test run, regardless of what the settings module actually sets —
+    # so DEBUG alone can't tell "really in production" apart from "running
+    # under manage.py test with dev settings". SETTINGS_MODULE isn't affected
+    # by that override, so checks that must stay silent in dev/CI need it too.
+    # override_settings() itself reports SETTINGS_MODULE as None when a test
+    # doesn't explicitly override it, so this must tolerate that as well.
+    settings_module = settings.SETTINGS_MODULE or ""
+    return not settings.DEBUG and not settings_module.endswith(".dev")
+
+
 @register()
 def check_production_database_backend(app_configs, **kwargs):
     errors = []
-    if settings.DEBUG:
+    if not _is_production():
         return errors
     if getattr(settings, "MARKETPLACE_ALLOW_SQLITE", False):
         return errors
@@ -28,9 +40,7 @@ def check_production_database_backend(app_configs, **kwargs):
 
 @register()
 def check_mock_provider_not_in_production(app_configs, **kwargs):
-    if settings.DEBUG or not getattr(settings, "MARKETPLACE_ALLOW_MOCK", False):
-        return []
-    if settings.SETTINGS_MODULE.endswith(".dev"):
+    if not _is_production() or not getattr(settings, "MARKETPLACE_ALLOW_MOCK", False):
         return []
     return [
         Error(
@@ -42,10 +52,6 @@ def check_mock_provider_not_in_production(app_configs, **kwargs):
             id="marketplace.E002",
         )
     ]
-
-
-def _is_production():
-    return not settings.DEBUG and not settings.SETTINGS_MODULE.endswith(".dev")
 
 
 @register()
