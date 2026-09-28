@@ -15,11 +15,15 @@ SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Django 5.1+ replaced STATICFILES_STORAGE/DEFAULT_FILE_STORAGE with the STORAGES dict.
-# The old settings are silently ignored on Django 6.0 (no back-compat shim) — using them
-# left prod serving static/media from local disk instead of WhiteNoise/R2.
+# The old settings are silently ignored on Django 6.0 (no back-compat shim).
+#
+# Media (user-uploaded) storage is opt-in to R2/S3: with no R2_* credentials set,
+# prod falls back to local disk (MEDIA_ROOT/MEDIA_URL from base.py) — the same
+# behaviour as dev. Set the R2_* vars below to switch to Cloudflare R2 (or any
+# S3-compatible provider) later without any further code change.
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -33,6 +37,9 @@ AWS_S3_ENDPOINT_URL = env("R2_ENDPOINT_URL", default=None)
 AWS_S3_CUSTOM_DOMAIN = env("R2_PUBLIC_DOMAIN", default=None)
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
+
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
+    STORAGES["default"] = {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}
 
 # EMAIL_BACKEND defaults to the console backend (base.py) and prod.py never overrode it,
 # so order/key-delivery emails would silently print to the log instead of sending.
