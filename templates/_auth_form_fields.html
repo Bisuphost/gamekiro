@@ -1,0 +1,20 @@
+{% load widget_tweaks %}
+{% if form.non_field_errors %}
+<div class="mb-5 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+    {% for error in form.non_field_errors %}
+    <p>{{ error }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+{% for field in form %}
+<div class="mb-4">
+    <label class="mb-1.5 block text-sm font-medium text-text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end transition" }}
+    {% if field.help_text %}
+    <div class="mt-1.5 text-xs text-text-secondary">{{ field.help_text }}</div>
+    {% endif %}
+    {% for error in field.errors %}
+    <p class="mt-1.5 text-sm text-red-400">{{ error }}</p>
+    {% endfor %}
+</div>
+{% endfor %}

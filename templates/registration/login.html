@@ -1,27 +1,20 @@
-{% extends "base.html" %}
-{% load widget_tweaks %}
+{% extends "auth_base.html" %}
 
 {% block title %}Log in{% endblock %}
+{% block heading %}Welcome back{% endblock %}
+{% block subheading %}<p class="mt-1.5 text-sm text-text-secondary">Log in to continue to GameKiro</p>{% endblock %}
 
 {% block content %}
-<div class="max-w-sm mx-auto">
-    <h1 class="text-2xl font-bold text-text-primary mb-6">Log in</h1>
-    <form method="post" class="space-y-4">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        {% for field in form %}
-        <div>
-            <label class="block text-sm font-medium text-text-secondary mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end" }}
-            {% for error in field.errors %}<p class="mt-1 text-sm text-red-400">{{ error }}</p>{% endfor %}
-        </div>
-        {% endfor %}
-        <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="w-full rounded-lg bg-accent-start text-text-primary py-2 text-sm font-bold hover:brightness-110 transition">Log in</button>
-    </form>
-    <div class="mt-4 text-sm flex justify-between">
-        <a href="{% url 'accounts:signup' %}" class="text-text-secondary underline hover:text-text-primary">Create an account</a>
-        <a href="{% url 'password_reset' %}" class="text-text-secondary underline hover:text-text-primary">Forgot password?</a>
-    </div>
+<form method="post">
+    {% csrf_token %}
+    {% include "_auth_form_fields.html" %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="w-full rounded-lg bg-accent-start py-2.5 text-sm font-bold text-text-primary transition hover:brightness-110">
+        Log in
+    </button>
+</form>
+<div class="mt-6 flex items-center justify-between text-sm">
+    <a href="{% url 'password_reset' %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Forgot password?</a>
+    <a href="{% url 'accounts:signup' %}" class="font-medium text-text-primary underline underline-offset-2 hover:text-accent-end">Create account</a>
 </div>
 {% endblock %}

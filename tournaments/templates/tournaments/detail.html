@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tournament.title }}{% endblock %}
+
+{% block content %}
+<div class="mb-4 text-sm text-text-secondary">
+    <a href="{% url 'tournaments:tournament_list' %}" class="hover:text-text-primary">Tournaments</a>
+    <span class="mx-1">/</span>
+    {{ tournament.title }}
+</div>
+
+<div class="mb-2 flex items-start justify-between gap-4">
+    <div>
+        <div class="mb-1 flex flex-wrap items-center gap-2">
+            {% if tournament.is_cancelled %}
+            <span class="inline-flex items-center rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-medium text-red-400">Cancelled</span>
+            {% elif tournament.is_live %}
+            <span class="inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-400">Live now</span>
+            {% elif tournament.is_past %}
+            <span class="inline-flex items-center rounded-full bg-surface-elevated px-2 py-0.5 text-xs font-medium text-text-secondary">Finished</span>
+            {% elif tournament.is_full %}
+            <span class="inline-flex items-center rounded-full bg-surface-elevated px-2 py-0.5 text-xs font-medium text-text-secondary">Full</span>
+            {% else %}
+            <span class="inline-flex items-center rounded-full bg-accent-start/20 px-2 py-0.5 text-xs font-medium text-accent-end">Open to join</span>
+            {% endif %}
+            <span class="text-sm text-text-secondary">{{ tournament.game.title }}{% if tournament.platform %} &middot; {{ tournament.platform }}{% endif %}</span>
+        </div>
+        <h1 class="text-2xl font-bold text-text-primary">{{ tournament.title }}</h1>
+        <p class="mt-1 text-sm text-text-secondary">Hosted by {{ tournament.organizer.display_name }}</p>
+    </div>
+
+    {% if is_organizer %}
+    <div class="flex shrink-0 items-center gap-3 text-sm">
+        <a href="{% url 'tournaments:tournament_edit' tournament.slug %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Edit</a>
+        {% if not tournament.is_cancelled and not tournament.is_past %}
+        <form method="post" action="{% url 'tournaments:tournament_cancel' tournament.slug %}">
+            {% csrf_token %}
+            <button type="submit" class="text-red-400 underline underline-offset-2 hover:text-red-300">Cancel</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="my-6 grid gap-4 sm:grid-cols-2">
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <p class="mb-1 text-xs uppercase tracking-wide text-text-secondary/70">Starts</p>
+        <p class="font-medium text-text-primary">{{ tournament.starts_at|date:"M j, Y, g:i A" }}</p>
+    </div>
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <p class="mb-1 text-xs uppercase tracking-wide text-text-secondary/70">Ends</p>
+        <p class="font-medium text-text-primary">{{ tournament.ends_at|date:"M j, Y, g:i A" }}</p>
+    </div>
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <p class="mb-1 text-xs uppercase tracking-wide text-text-secondary/70">Players</p>
+        <p class="font-medium text-text-primary">{{ tournament.participant_count }} / {{ tournament.max_players }}</p>
+    </div>
+    <div class="glass-panel rounded-xl border border-border-subtle/60 p-4">
+        <p class="mb-1 text-xs uppercase tracking-wide text-text-secondary/70">Spots left</p>
+        <p class="font-medium text-text-primary">{{ tournament.spots_left }}</p>
+    </div>
+</div>
+
+{% if tournament.description %}
+<div class="mb-6">
+    <h2 class="mb-2 text-lg font-bold text-text-primary">About</h2>
+    <p class="whitespace-pre-line text-text-secondary">{{ tournament.description }}</p>
+</div>
+{% endif %}
+
+{% if tournament.rules %}
+<div class="mb-6">
+    <h2 class="mb-2 text-lg font-bold text-text-primary">Rules</h2>
+    <p class="whitespace-pre-line text-text-secondary">{{ tournament.rules }}</p>
+</div>
+{% endif %}
+
+<div class="glass-panel mb-6 rounded-xl border border-border-subtle/60 p-5">
+    <h2 class="mb-3 text-lg font-bold text-text-primary">Room details</h2>
+    {% if can_view_room %}
+    <dl class="grid gap-4 text-sm sm:grid-cols-2">
+        <div>
+            <dt class="mb-1 text-text-secondary">Room code</dt>
+            <dd class="font-mono text-text-primary">{{ tournament.room_code|default:"Not set yet" }}</dd>
+        </div>
+        <div>
+            <dt class="mb-1 text-text-secondary">Room password</dt>
+            <dd class="font-mono text-text-primary">{{ tournament.room_password|default:"Not set yet" }}</dd>
+        </div>
+    </dl>
+    {% else %}
+    <p class="text-sm text-text-secondary">Join this tournament to see the room code and password.</p>
+    {% endif %}
+</div>
+
+<div class="flex items-center gap-3">
+    {% if not user.is_authenticated %}
+    <a href="{% url 'login' %}?next={{ request.path }}"
+       class="rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+        Log in to join
+    </a>
+    {% elif is_participant %}
+    <form method="post" action="{% url 'tournaments:tournament_leave' tournament.slug %}">
+        {% csrf_token %}
+        <button type="submit" class="rounded-lg border border-border-subtle px-4 py-2 text-sm font-medium text-text-primary transition hover:bg-surface">
+            Leave tournament
+        </button>
+    </form>
+    {% elif tournament.is_joinable %}
+    <form method="post" action="{% url 'tournaments:tournament_join' tournament.slug %}">
+        {% csrf_token %}
+        <button type="submit" class="rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+            Join tournament
+        </button>
+    </form>
+    {% else %}
+    <span class="text-sm text-text-secondary">
+        {% if tournament.is_cancelled %}This tournament was cancelled.
+        {% elif tournament.is_past %}This tournament has ended.
+        {% elif tournament.is_full %}This tournament is full.
+        {% endif %}
+    </span>
+    {% endif %}
+</div>
+{% endblock %}

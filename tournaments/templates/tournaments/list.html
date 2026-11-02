@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Tournaments{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-start justify-between gap-4">
+    <h1 class="text-2xl font-bold text-text-primary">Tournaments</h1>
+    {% if user.is_authenticated %}
+    <a href="{% url 'tournaments:tournament_create' %}"
+       class="shrink-0 rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+        List a tournament
+    </a>
+    {% else %}
+    <a href="{% url 'login' %}?next={% url 'tournaments:tournament_create' %}"
+       class="shrink-0 text-sm text-text-secondary underline underline-offset-2 hover:text-text-primary">
+        Log in to list a tournament
+    </a>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated %}
+<div class="mb-8 text-sm">
+    {% if user.organizer_profile.is_approved %}
+    <a href="{% url 'tournaments:organizer_dashboard' %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Manage your tournaments</a>
+    {% elif user.organizer_profile %}
+    <span class="text-text-secondary">Your organizer application is pending review.</span>
+    {% else %}
+    <a href="{% url 'tournaments:organizer_apply' %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Want to host tournaments? Apply as an organizer</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<section class="mb-10">
+    <h2 class="mb-3 text-lg font-bold text-text-primary">Happening right now</h2>
+    <div class="space-y-3">
+        {% for tournament in live %}
+        {% include "tournaments/_card.html" %}
+        {% empty %}
+        {% include "components/empty_state.html" with title="Nothing live right now" message="Check back soon." %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="mb-10">
+    <h2 class="mb-3 text-lg font-bold text-text-primary">Open for joining</h2>
+    <div class="space-y-3">
+        {% for tournament in joinable %}
+        {% include "tournaments/_card.html" %}
+        {% empty %}
+        {% include "components/empty_state.html" with title="No open tournaments yet" message="Check back soon as organizers list new events." %}
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <h2 class="mb-3 text-lg font-bold text-text-primary">Past tournaments</h2>
+    <div class="space-y-3">
+        {% for tournament in past %}
+        {% include "tournaments/_card.html" %}
+        {% empty %}
+        {% include "components/empty_state.html" with title="No tournaments have finished yet" %}
+        {% endfor %}
+    </div>
+
+    {% if past.paginator.num_pages > 1 %}
+    <nav class="mt-6 flex items-center justify-between text-sm">
+        {% if past.has_previous %}
+        <a href="?page={{ past.previous_page_number }}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">&larr; Previous</a>
+        {% else %}
+        <span class="text-text-secondary/40">&larr; Previous</span>
+        {% endif %}
+
+        <span class="text-text-secondary">Page {{ past.number }} of {{ past.paginator.num_pages }}</span>
+
+        {% if past.has_next %}
+        <a href="?page={{ past.next_page_number }}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Next &rarr;</a>
+        {% else %}
+        <span class="text-text-secondary/40">Next &rarr;</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+</section>
+{% endblock %}

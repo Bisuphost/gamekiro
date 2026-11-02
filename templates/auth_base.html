@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GameKiro{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="min-h-screen bg-bg-base text-text-primary font-sans antialiased">
+    <div class="flex min-h-screen flex-col items-center justify-center px-4 py-12">
+        <a href="{% url 'core:home' %}" class="mb-8">
+            <img src="{% static 'img/logo.png' %}" alt="GameKiro" class="h-7 w-auto">
+        </a>
+
+        <div class="glass-panel-elevated w-full max-w-md rounded-2xl border border-border-subtle/60 p-8">
+            {% block heading_block %}
+            <div class="mb-6 text-center">
+                <h1 class="text-xl font-bold text-text-primary">{% block heading %}{% endblock %}</h1>
+                {% block subheading %}{% endblock %}
+            </div>
+            {% endblock %}
+
+            {% if messages %}
+            <ul class="mb-6 space-y-2">
+                {% for message in messages %}
+                <li class="rounded-lg border border-border-subtle/60 bg-surface px-4 py-2 text-sm text-text-primary">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

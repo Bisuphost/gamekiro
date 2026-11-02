@@ -13,6 +13,7 @@
 @source "../games/templates";
 @source "../news/templates";
 @source "../marketplace/templates";
+@source "../tournaments/templates";
 
 @theme {
   --color-bg-base: #1E2029;

@@ -16,6 +16,7 @@ urlpatterns = [
     path("", include("notifications.urls")),
     path("", include("games.urls")),
     path("", include("news.urls")),
+    path("", include("tournaments.urls")),
     path("", include("accounts.urls")),
 ]
 

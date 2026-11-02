@@ -1,38 +1,43 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% load widget_tweaks %}
 
 {% block title %}Sign up{% endblock %}
+{% block heading %}Create your account{% endblock %}
+{% block subheading %}<p class="mt-1.5 text-sm text-text-secondary">Join the GameKiro community</p>{% endblock %}
 
 {% block content %}
-<div class="max-w-sm mx-auto">
-    <h1 class="text-2xl font-bold text-text-primary mb-6">Create an account</h1>
-    <form method="post" class="space-y-4">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        {% for field in form %}
-        {% if field.name != "agree_to_terms" %}
-        <div>
-            <label class="block text-sm font-medium text-text-secondary mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end" }}
-            {% if field.help_text %}<p class="mt-1 text-xs text-text-secondary">{{ field.help_text }}</p>{% endif %}
-            {% for error in field.errors %}<p class="mt-1 text-sm text-red-400">{{ error }}</p>{% endfor %}
-        </div>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+    {% if field.name != "agree_to_terms" %}
+    <div class="mb-4">
+        <label class="mb-1.5 block text-sm font-medium text-text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2.5 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end transition" }}
+        {% if field.help_text %}
+        <div class="mt-1.5 text-xs text-text-secondary">{{ field.help_text }}</div>
         {% endif %}
+        {% for error in field.errors %}
+        <p class="mt-1.5 text-sm text-red-400">{{ error }}</p>
         {% endfor %}
-        <div class="flex items-start gap-2">
-            {{ form.agree_to_terms|add_class:"mt-0.5 h-4 w-4 shrink-0 rounded border-border-subtle bg-surface focus:outline-none focus:ring-2 focus:ring-accent-end" }}
-            <label for="{{ form.agree_to_terms.id_for_label }}" class="text-sm text-text-secondary">
-                I am at least 13 years old and I agree to the
-                <a href="{% url 'core:terms' %}" target="_blank" rel="noopener" class="underline hover:text-text-primary">Terms of Service</a>
-                and
-                <a href="{% url 'core:privacy' %}" target="_blank" rel="noopener" class="underline hover:text-text-primary">Privacy Policy</a>.
-            </label>
-        </div>
-        {% for error in form.agree_to_terms.errors %}<p class="text-sm text-red-400">{{ error }}</p>{% endfor %}
-        <button type="submit" class="w-full rounded-lg bg-accent-start text-text-primary py-2 text-sm font-bold hover:brightness-110 transition">Sign up</button>
-    </form>
-    <div class="mt-4 text-sm">
-        <a href="{% url 'login' %}" class="text-text-secondary underline hover:text-text-primary">Already have an account?</a>
     </div>
+    {% endif %}
+    {% endfor %}
+    <div class="mb-5 flex items-start gap-2">
+        {{ form.agree_to_terms|add_class:"mt-0.5 h-4 w-4 shrink-0 rounded border-border-subtle bg-surface focus:outline-none focus:ring-2 focus:ring-accent-end" }}
+        <label for="{{ form.agree_to_terms.id_for_label }}" class="text-sm text-text-secondary">
+            I am at least 13 years old and I agree to the
+            <a href="{% url 'core:terms' %}" target="_blank" rel="noopener" class="underline hover:text-text-primary">Terms of Service</a>
+            and
+            <a href="{% url 'core:privacy' %}" target="_blank" rel="noopener" class="underline hover:text-text-primary">Privacy Policy</a>.
+        </label>
+    </div>
+    {% for error in form.agree_to_terms.errors %}<p class="mb-4 text-sm text-red-400">{{ error }}</p>{% endfor %}
+    <button type="submit" class="w-full rounded-lg bg-accent-start py-2.5 text-sm font-bold text-text-primary transition hover:brightness-110">
+        Sign up
+    </button>
+</form>
+<div class="mt-6 text-center text-sm">
+    <a href="{% url 'login' %}" class="font-medium text-text-primary underline underline-offset-2 hover:text-accent-end">Already have an account? Log in</a>
 </div>
 {% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Become a tournament organizer{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-2xl font-bold text-text-primary">Become a tournament organizer</h1>
+
+{% if existing %}
+<div class="glass-panel max-w-2xl rounded-xl border border-border-subtle/60 p-5">
+    <p class="mb-1 text-sm text-text-secondary">Status</p>
+    {% if existing.status == "pending" %}
+    <p class="font-medium text-text-primary">Your application is pending review.</p>
+    {% elif existing.status == "rejected" %}
+    <p class="font-medium text-text-primary">Your application wasn't approved.</p>
+    {% endif %}
+</div>
+{% else %}
+<p class="mb-6 max-w-2xl text-text-secondary">
+    Tell us a bit about yourself. Once approved, you'll be able to list tournaments with room
+    details, player limits, and start times.
+</p>
+<form method="post" class="max-w-2xl space-y-4">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+    <div>
+        <label class="mb-1 block text-sm font-medium text-text-secondary" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field|add_class:"w-full rounded-lg border border-border-subtle bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-end" }}
+        {% for error in field.errors %}
+        <p class="mt-1 text-sm text-red-400">{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+        Submit application
+    </button>
+</form>
+{% endif %}
+{% endblock %}
