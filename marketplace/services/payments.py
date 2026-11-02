@@ -429,6 +429,7 @@ def _apply_success(order, event, now):
         _mark_payment_paid(order, event, now)
         _hold_or_fulfill(order, now)
         _record(order, "paid")
+        notifications_service.queue_invoice_email(order)
         return "processed", order
 
     if order.status == Order.Status.EXPIRED:
@@ -497,6 +498,7 @@ def _apply_late_payment(order, event, now):
     _mark_payment_paid(order, event, now)
     _hold_or_fulfill(order, now)
     _record(order, "paid_late_recovered")
+    notifications_service.queue_invoice_email(order)
     return "processed", order
 
 

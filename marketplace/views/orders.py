@@ -60,6 +60,22 @@ def order_detail(request, reference):
 
 @login_required
 @require_marketplace_enabled
+def order_invoice(request, reference):
+    order = get_object_or_404(
+        Order.objects.select_related("coupon"), reference=reference, user=request.user
+    )
+    if not order.paid_at:
+        return redirect("marketplace:order_detail", reference=order.reference)
+    items = order.items.select_related("product").all()
+    return render(
+        request,
+        "marketplace/order_invoice.html",
+        {"order": order, "items": items},
+    )
+
+
+@login_required
+@require_marketplace_enabled
 def check_payment_status(request, reference):
     order = get_object_or_404(Order, reference=reference, user=request.user)
 

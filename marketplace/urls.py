@@ -36,6 +36,7 @@ urlpatterns = [
     path("checkout/mock/<str:reference>/", checkout.mock_checkout_page, name="mock_checkout"),
     path("orders/", orders.order_list, name="order_list"),
     path("orders/<str:reference>/", orders.order_detail, name="order_detail"),
+    path("orders/<str:reference>/invoice/", orders.order_invoice, name="order_invoice"),
     path("orders/<str:reference>/pay/", checkout.order_pay, name="order_pay"),
     path(
         "orders/<str:reference>/check-status/",
