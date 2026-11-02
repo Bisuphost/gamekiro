@@ -42,6 +42,7 @@ LOCAL_APPS = [
     "reputation",
     "gamification",
     "games",
+    "tournaments",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

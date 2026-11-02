@@ -1,0 +1,27 @@
+<a href="{% url 'tournaments:tournament_detail' tournament.slug %}"
+   class="block rounded-lg border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-sm transition">
+    <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+                {% if tournament.is_live %}
+                <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-0.5">Live now</span>
+                {% elif tournament.is_past %}
+                <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-600 text-xs font-medium px-2 py-0.5">Finished</span>
+                {% elif tournament.is_full %}
+                <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-600 text-xs font-medium px-2 py-0.5">Full</span>
+                {% else %}
+                <span class="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5">Open to join</span>
+                {% endif %}
+                <span class="text-sm text-slate-500">{{ tournament.game_title }}</span>
+            </div>
+            <h3 class="font-semibold text-slate-900 truncate">{{ tournament.title }}</h3>
+            <p class="text-sm text-slate-500 mt-1">
+                by {{ tournament.organizer.display_name }}
+                &middot; {{ tournament.participant_count }}/{{ tournament.max_players }} players
+            </p>
+        </div>
+        <div class="shrink-0 text-right text-sm text-slate-500 whitespace-nowrap">
+            {{ tournament.starts_at|date:"M j, g:i A" }}
+        </div>
+    </div>
+</a>

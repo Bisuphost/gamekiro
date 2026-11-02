@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Tournaments{% endblock %}
+
+{% block content %}
+<div class="flex items-start justify-between gap-4 mb-6">
+    <h1 class="text-2xl font-bold text-slate-900">Tournaments</h1>
+    {% if user.is_authenticated %}
+    <a href="{% url 'tournaments:tournament_create' %}"
+       class="shrink-0 rounded-md bg-slate-900 text-white py-2 px-4 text-sm font-medium hover:bg-slate-700 transition">
+        List a tournament
+    </a>
+    {% else %}
+    <a href="{% url 'login' %}?next={% url 'tournaments:tournament_create' %}"
+       class="shrink-0 text-sm text-slate-600 underline underline-offset-2 hover:text-slate-900">
+        Log in to list a tournament
+    </a>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated %}
+<div class="mb-8 text-sm">
+    {% if user.organizer_profile.is_approved %}
+    <a href="{% url 'tournaments:organizer_dashboard' %}" class="text-slate-500 underline underline-offset-2 hover:text-slate-900">Manage your tournaments</a>
+    {% elif user.organizer_profile %}
+    <span class="text-slate-500">Your organizer application is pending review.</span>
+    {% else %}
+    <a href="{% url 'tournaments:organizer_apply' %}" class="text-slate-500 underline underline-offset-2 hover:text-slate-900">Want to host tournaments? Apply as an organizer</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<section class="mb-10">
+    <h2 class="text-lg font-semibold text-slate-900 mb-3">Happening right now</h2>
+    <div class="space-y-3">
+        {% for tournament in live %}
+        {% include "tournaments/_card.html" %}
+        {% empty %}
+        <div class="rounded-lg border border-dashed border-slate-300 py-8 text-center text-slate-500">
+            Nothing live right now.
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="mb-10">
+    <h2 class="text-lg font-semibold text-slate-900 mb-3">Open for joining</h2>
+    <div class="space-y-3">
+        {% for tournament in joinable %}
+        {% include "tournaments/_card.html" %}
+        {% empty %}
+        <div class="rounded-lg border border-dashed border-slate-300 py-8 text-center text-slate-500">
+            No open tournaments yet — check back soon.
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <h2 class="text-lg font-semibold text-slate-900 mb-3">Past tournaments</h2>
+    <div class="space-y-3">
+        {% for tournament in past %}
+        {% include "tournaments/_card.html" %}
+        {% empty %}
+        <div class="rounded-lg border border-dashed border-slate-300 py-8 text-center text-slate-500">
+            No tournaments have finished yet.
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if past.paginator.num_pages > 1 %}
+    <nav class="mt-6 flex items-center justify-between text-sm">
+        {% if past.has_previous %}
+        <a href="?page={{ past.previous_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">&larr; Previous</a>
+        {% else %}
+        <span class="text-slate-300">&larr; Previous</span>
+        {% endif %}
+
+        <span class="text-slate-500">Page {{ past.number }} of {{ past.paginator.num_pages }}</span>
+
+        {% if past.has_next %}
+        <a href="?page={{ past.next_page_number }}" class="text-slate-600 hover:text-slate-900 underline underline-offset-2">Next &rarr;</a>
+        {% else %}
+        <span class="text-slate-300">Next &rarr;</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+</section>
+{% endblock %}
