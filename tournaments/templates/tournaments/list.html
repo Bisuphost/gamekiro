@@ -3,62 +3,126 @@
 {% block title %}Tournaments{% endblock %}
 
 {% block content %}
-<div class="mb-6 flex items-start justify-between gap-4">
-    <h1 class="text-2xl font-bold text-text-primary">Tournaments</h1>
+<div class="mb-2 flex flex-wrap items-start justify-between gap-4">
+    <div>
+        <h1 class="text-2xl font-bold text-text-primary">Tournaments</h1>
+        <p class="mt-1 text-sm text-text-secondary">Compete, spectate, or run your own bracket.</p>
+    </div>
     {% if user.is_authenticated %}
     <a href="{% url 'tournaments:tournament_create' %}"
-       class="shrink-0 rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+       class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-start px-4 py-2 text-sm font-bold text-text-primary transition hover:brightness-110">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
         List a tournament
     </a>
     {% else %}
     <a href="{% url 'login' %}?next={% url 'tournaments:tournament_create' %}"
-       class="shrink-0 text-sm text-text-secondary underline underline-offset-2 hover:text-text-primary">
+       class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border-subtle bg-surface px-4 py-2 text-sm font-bold text-text-primary transition hover:border-accent-end/40 hover:bg-surface-elevated">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H3" />
+        </svg>
         Log in to list a tournament
     </a>
     {% endif %}
 </div>
 
 {% if user.is_authenticated %}
-<div class="mb-8 text-sm">
+<div class="mb-10">
     {% if user.organizer_profile.is_approved %}
-    <a href="{% url 'tournaments:organizer_dashboard' %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Manage your tournaments</a>
+    <a href="{% url 'tournaments:organizer_dashboard' %}"
+       class="inline-flex items-center gap-1.5 text-sm font-medium text-accent-end hover:underline underline-offset-2">
+        Manage your tournaments
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+        </svg>
+    </a>
     {% elif user.organizer_profile %}
-    <span class="text-text-secondary">Your organizer application is pending review.</span>
+    <span class="inline-flex items-center gap-1.5 text-sm text-text-secondary">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        Your organizer application is pending review
+    </span>
     {% else %}
-    <a href="{% url 'tournaments:organizer_apply' %}" class="text-text-secondary underline underline-offset-2 hover:text-text-primary">Want to host tournaments? Apply as an organizer</a>
+    <a href="{% url 'tournaments:organizer_apply' %}"
+       class="inline-flex items-center gap-1.5 text-sm font-medium text-accent-end hover:underline underline-offset-2">
+        Want to host tournaments? Apply as an organizer
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+        </svg>
+    </a>
     {% endif %}
 </div>
+{% else %}
+<div class="mb-10"></div>
 {% endif %}
 
-<section class="mb-10">
-    <h2 class="mb-3 text-lg font-bold text-text-primary">Happening right now</h2>
+<section class="mb-12">
+    <h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-text-primary">
+        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+        Happening right now
+    </h2>
     <div class="space-y-3">
         {% for tournament in live %}
         {% include "tournaments/_card.html" %}
         {% empty %}
-        {% include "components/empty_state.html" with title="Nothing live right now" message="Check back soon." %}
+        <div class="glass-panel flex flex-col items-center gap-3 rounded-xl border border-dashed border-border-subtle/80 px-6 py-10 text-center">
+            <div class="flex h-11 w-11 items-center justify-center rounded-full bg-surface-elevated text-text-secondary">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-text-primary">Nothing live right now</h3>
+                <p class="mt-1 text-sm text-text-secondary">Check back soon.</p>
+            </div>
+        </div>
         {% endfor %}
     </div>
 </section>
 
-<section class="mb-10">
-    <h2 class="mb-3 text-lg font-bold text-text-primary">Open for joining</h2>
+<section class="mb-12">
+    <h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-text-primary">
+        <span class="h-2 w-2 rounded-full bg-accent-end"></span>
+        Open for joining
+    </h2>
     <div class="space-y-3">
         {% for tournament in joinable %}
         {% include "tournaments/_card.html" %}
         {% empty %}
-        {% include "components/empty_state.html" with title="No open tournaments yet" message="Check back soon as organizers list new events." %}
+        <div class="glass-panel flex flex-col items-center gap-3 rounded-xl border border-dashed border-border-subtle/80 px-6 py-10 text-center">
+            <div class="flex h-11 w-11 items-center justify-center rounded-full bg-surface-elevated text-text-secondary">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-text-primary">No open tournaments yet</h3>
+                <p class="mt-1 text-sm text-text-secondary">Check back soon as organizers list new events.</p>
+            </div>
+        </div>
         {% endfor %}
     </div>
 </section>
 
 <section>
-    <h2 class="mb-3 text-lg font-bold text-text-primary">Past tournaments</h2>
+    <h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-text-primary">
+        <span class="h-2 w-2 rounded-full bg-text-secondary/60"></span>
+        Past tournaments
+    </h2>
     <div class="space-y-3">
         {% for tournament in past %}
         {% include "tournaments/_card.html" %}
         {% empty %}
-        {% include "components/empty_state.html" with title="No tournaments have finished yet" %}
+        <div class="glass-panel flex flex-col items-center gap-3 rounded-xl border border-dashed border-border-subtle/80 px-6 py-10 text-center">
+            <div class="flex h-11 w-11 items-center justify-center rounded-full bg-surface-elevated text-text-secondary">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+            </div>
+            <h3 class="font-bold text-text-primary">No tournaments have finished yet</h3>
+        </div>
         {% endfor %}
     </div>
 

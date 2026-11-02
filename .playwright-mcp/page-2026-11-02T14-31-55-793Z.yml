@@ -1,0 +1,69 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "GameKiro" [ref=e5]
+      - generic [ref=e6]:
+        - generic [ref=e7]: Search threads
+        - searchbox "Search threads" [ref=e9]
+      - generic [ref=e10]:
+        - link "Log in" [ref=e11] [cursor=pointer]:
+          - /url: /accounts/login/
+        - link "Sign up" [ref=e12] [cursor=pointer]:
+          - /url: /accounts/signup/
+    - generic [ref=e13]:
+      - generic [ref=e14]: Search threads
+      - searchbox [ref=e16]
+  - generic [ref=e17]:
+    - complementary [ref=e18]:
+      - navigation [ref=e19]:
+        - link "New Thread" [ref=e20] [cursor=pointer]:
+          - /url: /forum/new/
+        - paragraph [ref=e23]: Main
+        - link "Dashboard" [ref=e24] [cursor=pointer]:
+          - /url: /
+        - link "Forums" [ref=e27] [cursor=pointer]:
+          - /url: /forum/
+        - link "Games" [ref=e30] [cursor=pointer]:
+          - /url: /games/
+        - link "Tournaments" [ref=e33] [cursor=pointer]:
+          - /url: /tournaments/
+        - link "News" [ref=e36] [cursor=pointer]:
+          - /url: /news/
+        - paragraph [ref=e39]: Store
+        - link "Browse Store" [ref=e40] [cursor=pointer]:
+          - /url: /store/
+    - main [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - heading "Tournaments" [level=1] [ref=e47]
+            - paragraph [ref=e48]: Compete, spectate, or run your own bracket.
+          - link "Log in to list a tournament" [ref=e49] [cursor=pointer]:
+            - /url: /accounts/login/?next=/tournaments/new/
+        - generic [ref=e52]:
+          - heading "Happening right now" [level=2] [ref=e53]
+          - generic [ref=e60]:
+            - heading "Nothing live right now" [level=3] [ref=e61]
+            - paragraph [ref=e62]: Check back soon.
+        - generic [ref=e63]:
+          - heading "Open for joining" [level=2] [ref=e64]
+          - generic [ref=e71]:
+            - heading "No open tournaments yet" [level=3] [ref=e72]
+            - paragraph [ref=e73]: Check back soon as organizers list new events.
+        - generic [ref=e74]:
+          - heading "Past tournaments" [level=2] [ref=e75]
+          - heading "No tournaments have finished yet" [level=3] [ref=e82]
+  - contentinfo [ref=e83]:
+    - generic [ref=e84]:
+      - paragraph [ref=e85]: © 2026 Cosmic Store LLC. GameKiro is a trademark of Cosmic Store LLC.
+      - navigation "Legal" [ref=e86]:
+        - link "Privacy Policy" [ref=e87] [cursor=pointer]:
+          - /url: /privacy/
+        - link "Terms of Service" [ref=e88] [cursor=pointer]:
+          - /url: /terms/
+        - link "Cookie Policy" [ref=e89] [cursor=pointer]:
+          - /url: /cookies/
+        - link "Contact" [ref=e90] [cursor=pointer]:
+          - /url: mailto:contact@gamekiro.com
