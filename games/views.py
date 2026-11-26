@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
+from core.seo import absolute_media_url, absolute_url
 from moderation.models import Report
 from moderation.services import hidden_object_ids
 from reactions.services import has_reacted, reaction_counts_for
@@ -111,5 +113,28 @@ def _game_review_context(request, game):
             "review_form": review_form,
             "user_review": user_review,
             "report_reasons": Report.Reason.choices,
+            "structured_data": _game_structured_data(game, len(review_list), average_rating),
         },
     )
+
+
+def _game_structured_data(game, review_count, average_rating):
+    data = {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": game.title,
+        "url": absolute_url(reverse("games:detail", args=[game.slug])),
+    }
+    if game.cover_image:
+        data["image"] = absolute_media_url(game.cover_image.url)
+    if game.description:
+        data["description"] = game.description
+    if review_count:
+        data["aggregateRating"] = {
+            "@type": "AggregateRating",
+            "ratingValue": average_rating,
+            "reviewCount": review_count,
+            "bestRating": 5,
+            "worstRating": 1,
+        }
+    return data

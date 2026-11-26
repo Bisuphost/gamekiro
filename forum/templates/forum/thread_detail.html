@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
+{% load seo_tags %}
 
-{% block title %}{{ thread.title }}{% endblock %}
+{% block title %}{{ thread.title }} | GameKiro Forum{% endblock %}
+
+{% block meta_description %}{{ meta_description }}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">{{ structured_data|ld_json }}</script>
+{% endblock %}
 
 {% block extra_head %}
 {% if reply_form %}

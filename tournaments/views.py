@@ -3,9 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
+
+from core.seo import absolute_url
 
 from .forms import OrganizerApplicationForm, TournamentForm
 from .models import OrganizerProfile, Tournament, TournamentParticipant
@@ -52,8 +55,59 @@ def tournament_detail(request, slug):
             "can_view_room": can_view_room,
             "is_participant": is_participant,
             "is_organizer": is_organizer,
+            "structured_data": _tournament_structured_data(tournament),
+            "breadcrumb_data": _tournament_breadcrumb_data(tournament),
         },
     )
+
+
+def _tournament_structured_data(tournament):
+    tournament_url = absolute_url(reverse("tournaments:tournament_detail", args=[tournament.slug]))
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": tournament.title,
+        "startDate": tournament.starts_at.isoformat(),
+        "endDate": tournament.ends_at.isoformat(),
+        "eventStatus": (
+            "https://schema.org/EventCancelled"
+            if tournament.is_cancelled
+            else "https://schema.org/EventScheduled"
+        ),
+        "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+        "location": {"@type": "VirtualLocation", "url": tournament_url},
+        "organizer": {
+            "@type": "Person",
+            "name": tournament.organizer.display_name,
+        },
+        "url": tournament_url,
+    }
+    if tournament.description:
+        data["description"] = tournament.description
+    return data
+
+
+def _tournament_breadcrumb_data(tournament):
+    return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Tournaments",
+                "item": absolute_url(reverse("tournaments:tournament_list")),
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": tournament.title,
+                "item": absolute_url(
+                    reverse("tournaments:tournament_detail", args=[tournament.slug])
+                ),
+            },
+        ],
+    }
 
 
 @login_required

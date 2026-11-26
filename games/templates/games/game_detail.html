@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 {% load widget_tweaks %}
+{% load seo_tags %}
 
 {% block title %}{{ game.title }} | GameKiro{% endblock %}
+
+{% block meta_description %}{% if game.description %}{{ game.description|truncatewords:30 }}{% else %}{{ game.title }} on GameKiro: reviews, discussion, and game keys.{% endif %}{% endblock %}
+
+{% block og_image %}{% if game.cover_image %}{{ game.cover_image.url|absolute_media_url }}{% else %}{{ default_og_image }}{% endif %}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">{{ structured_data|ld_json }}</script>
+{% endblock %}
 
 {% block content %}
 <article class="mx-auto max-w-4xl space-y-8">

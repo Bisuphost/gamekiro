@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 {% load marketplace_tags %}
+{% load seo_tags %}
 
 {% block title %}{{ product.game.title }} | GameKiro Store{% endblock %}
 
-{% block extra_head %}
-<meta property="og:title" content="{{ product.game.title }}">
-<meta property="og:description" content="{{ product.description|truncatewords:30 }}">
+{% block meta_description %}{% if product.description %}{{ product.description|truncatewords:30 }}{% else %}Buy a verified {{ product.game.title }} key on GameKiro.{% endif %}{% endblock %}
+
+{% block og_image %}{% if product.game.cover_image %}{{ product.game.cover_image.url|absolute_media_url }}{% else %}{{ default_og_image }}{% endif %}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">{{ structured_data|ld_json }}</script>
 {% endblock %}
 
 {% block content %}

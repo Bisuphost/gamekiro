@@ -1,6 +1,14 @@
 {% extends "base.html" %}
+{% load seo_tags %}
 
-{% block title %}{{ tournament.title }}{% endblock %}
+{% block title %}{{ tournament.title }} | GameKiro Tournaments{% endblock %}
+
+{% block meta_description %}{% filter truncatechars:157 %}{{ tournament.title }}: a {{ tournament.game.title }} tournament on GameKiro, hosted by {{ tournament.organizer.display_name }}.{% endfilter %}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">{{ structured_data|ld_json }}</script>
+<script type="application/ld+json">{{ breadcrumb_data|ld_json }}</script>
+{% endblock %}
 
 {% block content %}
 <div class="mb-4 text-sm text-text-secondary">

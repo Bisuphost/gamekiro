@@ -1,8 +1,10 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from forum.models import Post
@@ -120,6 +122,9 @@ def profile(request, username):
         request.user.is_authenticated
         and profile_user.followers.filter(follower=request.user).exists()
     )
+    # /u/<username>/ and /<username>/ render the same profile; point search
+    # engines at the shorter one so the two don't compete as duplicate content.
+    canonical_path = reverse("accounts:profile-detail", args=[username])
     return render(
         request,
         "accounts/profile.html",
@@ -129,6 +134,7 @@ def profile(request, username):
             "profile_game_form": ProfileGameForm() if request.user == profile_user else None,
             "post_count": Post.objects.filter(author=profile_user).count(),
             "is_following": is_following,
+            "canonical_url": settings.SITE_URL.rstrip("/") + canonical_path,
         },
     )
 

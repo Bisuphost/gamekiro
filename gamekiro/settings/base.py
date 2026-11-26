@@ -30,6 +30,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "django.contrib.postgres",
+    "django.contrib.sitemaps",
     "django_htmx",
     "taggit",
     "widget_tweaks",
@@ -88,6 +89,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.seo",
             ],
         },
     },

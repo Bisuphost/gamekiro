@@ -2,6 +2,34 @@
 
 {% block title %}GameKiro — Home{% endblock %}
 
+{% block meta_description %}GameKiro: buy and sell game keys, join and run tournaments, and talk games with the community forum.{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "GameKiro",
+      "url": "{{ site_url }}/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ site_url }}{% url 'forum:search' %}?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "GameKiro",
+      "url": "{{ site_url }}/",
+      "logo": "{{ default_og_image }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="w-full space-y-6">
     <section class="animate-fade-in-up flex flex-wrap items-end justify-between gap-4">

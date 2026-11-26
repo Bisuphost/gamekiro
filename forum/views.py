@@ -5,9 +5,12 @@ from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.text import slugify
+from django.urls import reverse
+from django.utils.html import strip_tags
+from django.utils.text import Truncator, slugify
 from django.views.decorators.http import require_POST
 
+from core.seo import absolute_url
 from moderation.models import Report
 from moderation.services import hidden_object_ids
 from notifications.models import Notification
@@ -109,6 +112,23 @@ def thread_detail(request, category_slug, thread_slug):
     thread.user_has_liked = has_reacted(request.user, thread)
 
     reply_form = PostForm() if request.user.is_authenticated else None
+    thread_url = absolute_url(
+        reverse("forum:thread_detail", args=[thread.category.slug, thread.slug])
+    )
+    first_post_text = strip_tags(post_list[0].body) if post_list else ""
+    structured_data = {
+        "@context": "https://schema.org",
+        "@type": "DiscussionForumPosting",
+        "headline": thread.title,
+        "datePublished": thread.created_at.isoformat(),
+        "url": thread_url,
+        "author": {
+            "@type": "Person",
+            "name": thread.author.get_full_name() or thread.author.username,
+        },
+    }
+    if first_post_text:
+        structured_data["text"] = Truncator(first_post_text).words(60)
     return render(
         request,
         "forum/thread_detail.html",
@@ -117,6 +137,10 @@ def thread_detail(request, category_slug, thread_slug):
             "posts": posts,
             "reply_form": reply_form,
             "report_reasons": Report.Reason.choices,
+            "structured_data": structured_data,
+            "meta_description": Truncator(first_post_text).words(30)
+            if first_post_text
+            else f"Join the discussion: {thread.title} in {thread.category.name} on GameKiro.",
         },
     )
 

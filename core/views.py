@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Avg, Count
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.generic import TemplateView
@@ -12,6 +14,20 @@ from news.models import Article
 from reputation.models import KarmaScore
 
 KARMA_BADGE_THRESHOLD = 50
+
+
+def robots_txt(request):
+    # /store/cart/, /checkout/, /orders/, /manage/, etc. are deliberately left
+    # crawlable: they already carry <meta name="robots" content="noindex">,
+    # and disallowing them here would stop Googlebot from ever seeing that tag.
+    lines = [
+        "User-agent: *",
+        "Disallow: /accounts/",
+        f"Disallow: /{settings.ADMIN_URL}",
+        "",
+        f"Sitemap: {settings.SITE_URL.rstrip('/')}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
 def home(request):

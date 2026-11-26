@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
+from core.seo import absolute_media_url, absolute_url
 from marketplace.models import ActivationPlatform, Product, Region, WishlistItem
 from marketplace.services import inventory as inventory_service
 
@@ -79,5 +81,35 @@ def product_detail(request, slug):
     return render(
         request,
         "marketplace/product_detail.html",
-        {"product": product, "available_count": available, "in_wishlist": in_wishlist},
+        {
+            "product": product,
+            "available_count": available,
+            "in_wishlist": in_wishlist,
+            "structured_data": _product_structured_data(product, available),
+        },
     )
+
+
+def _product_structured_data(product, available_count):
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": f"{product.game.title} ({product.activation_platform.name}, {product.region.name})",
+        "url": absolute_url(reverse("marketplace:product_detail", args=[product.slug])),
+        "offers": {
+            "@type": "Offer",
+            "price": f"{product.unit_price_minor / 100:.2f}",
+            "priceCurrency": product.currency,
+            "availability": (
+                "https://schema.org/InStock"
+                if available_count > 0
+                else "https://schema.org/OutOfStock"
+            ),
+            "url": absolute_url(reverse("marketplace:product_detail", args=[product.slug])),
+        },
+    }
+    if product.game.cover_image:
+        data["image"] = absolute_media_url(product.game.cover_image.url)
+    if product.description:
+        data["description"] = product.description
+    return data
